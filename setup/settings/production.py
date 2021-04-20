@@ -111,6 +111,6 @@ CACHES = {
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient'
         },
-        'KEY_PREFIX': 'oort_cache'
+        'KEY_PREFIX': 'storee_cache'
     }
 }

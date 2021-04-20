@@ -66,7 +66,7 @@ CACHES = {
         'OPTIONS': {
             'server_max_value_length': 1024 * 1024 * 2,
         },
-        'KEY_PREFIX': 'oort_cache'
+        'KEY_PREFIX': 'storee_cache'
     }
 }
 
