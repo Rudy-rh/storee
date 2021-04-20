@@ -79,8 +79,8 @@ MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mydomain_db',
-        'USER': 'mydomain_db_user',
+        'NAME': 'storee_db',
+        'USER': 'storee_db_user',
         'PASSWORD': '6+Zwx37G3)EhSx',
         'HOST': HOST,   # Or an IP Address that your DB is hosted on
         'PORT': '',
