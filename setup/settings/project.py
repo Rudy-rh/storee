@@ -89,18 +89,6 @@ SESSION_SAVE_EVERY_REQUEST = False
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
-# Static files (CSS, JavaScript, Images)
-# ------------------------------------------------------------------------------
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media/')
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-    os.path.join(PROJECT_PATH, 'static/'),
-)
-
-
 # Django Simple JWT
 # ------------------------------------------------------------------------------
 # https://github.com/davesque/django-rest-framework-simplejwt
