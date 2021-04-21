@@ -1,13 +1,8 @@
-import uuid
-
 from django.db import models
+from .abstract import AbstractCommonField
 
 
-class AbstractStyleCategory(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    create_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    update_at = models.DateTimeField(auto_now=True)
-
+class AbstractStyleCategory(AbstractCommonField):
     label = models.CharField(max_length=255)
 
     class Meta:
@@ -18,11 +13,7 @@ class AbstractStyleCategory(models.Model):
         return self.label
 
 
-class AbstractStyleItem(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    create_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    update_at = models.DateTimeField(auto_now=True)
-
+class AbstractStyleItem(AbstractCommonField):
     style_category = models.ForeignKey('barber.StyleCategory', on_delete=models.CASCADE,
                                        related_name='items')
 
@@ -36,11 +27,7 @@ class AbstractStyleItem(models.Model):
         return self.label or self.style_category.label
 
 
-class AbstractStyleAttachment(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    create_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    update_at = models.DateTimeField(auto_now=True)
-
+class AbstractStyleAttachment(AbstractCommonField):
     style_item = models.ForeignKey('barber.StyleItem', on_delete=models.CASCADE,
                                    related_name='attachments')
 
