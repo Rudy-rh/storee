@@ -59,7 +59,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost',
     'http://localhost:8100',
-    'storee-46b6e.web.app',
+    'https://storee-46b6e.web.app',
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
