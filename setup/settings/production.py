@@ -41,13 +41,13 @@ X_FRAME_OPTIONS = 'DENY'
 # Django csrf
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/2.2/ref/csrf/
-CSRF_COOKIE_DOMAIN = '.mydomain.com'
+CSRF_COOKIE_DOMAIN = '.10ra10s25vr16.com'
 CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
 CSRF_COOKIE_SECURE = True
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 CSRF_TRUSTED_ORIGINS = [
-    '.mydomain.com'
+    '.10ra10s25vr16.com'
 ]
 
 
@@ -59,7 +59,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost',
     'http://localhost:8100',
-    'https://app.mydomain.com',
+    'storee-46b6e.web.app',
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [

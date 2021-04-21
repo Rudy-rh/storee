@@ -16,7 +16,7 @@ class AbstractBooking(AbstractCommonField):
         OTHER = 'ot', _("Lainnya")
 
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                                 related_name='bookings')
+                                 related_name='bookings', limit_choices_to={'groups__name': 'Customer'})
     barberman = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                                   null=True, limit_choices_to={'groups__name': 'Barberman'})
 
