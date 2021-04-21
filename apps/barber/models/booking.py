@@ -6,11 +6,21 @@ from .abstract import AbstractCommonField
 
 
 class AbstractBooking(AbstractCommonField):
+    class Types(models.TextChoices):
+        HAIRCUT = 'hc', _("Hair Cut")
+        HAIRSPA = 'hs', _("Hair Spa")
+        MESSAGE = 'ms', _("Message")
+        COLORING = 'cr', _("Coloring")
+        BLACKMASK = 'bm', _("Black Mask")
+        OZONE_MICROMIST = 'om', _("Ozone MicroMist"),
+        OTHER = 'ot', _("Lainnya")
+
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                  related_name='bookings')
     barberman = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                                   null=True, limit_choices_to={'groups__name': 'Barberman'})
 
+    reserved_type = models.CharField(choices=Types.choices, max_length=5)
     reserved_date = models.DateField(auto_now=False)
     reserved_time = models.TimeField(auto_now=True)
     note = models.TextField(null=True, blank=True)
