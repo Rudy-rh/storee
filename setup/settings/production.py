@@ -6,8 +6,14 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from corsheaders.defaults import default_headers
 
-DEBUG = False
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+DEBUG = True
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    '202.157.184.46',
+    'console.storeebarbershop.com'
+]
 
 
 # SENTRY
@@ -41,13 +47,13 @@ X_FRAME_OPTIONS = 'DENY'
 # Django csrf
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/2.2/ref/csrf/
-CSRF_COOKIE_DOMAIN = '.10ra10s25vr16.com'
+CSRF_COOKIE_DOMAIN = '.storeebarbershop.com'
 CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
 CSRF_COOKIE_SECURE = True
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 CSRF_TRUSTED_ORIGINS = [
-    '.10ra10s25vr16.com'
+    '.storeebarbershop.com'
 ]
 
 
