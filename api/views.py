@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.translation import gettext_lazy as _
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -28,6 +28,7 @@ class RootApiView(APIView):
 
 
 @api_view(['GET'])
+@permission_classes((AllowAny, ))
 @ensure_csrf_cookie
 def ping(request):
     csrftoken = request.COOKIES.get('csrftoken')
