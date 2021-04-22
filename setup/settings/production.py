@@ -49,6 +49,7 @@ X_FRAME_OPTIONS = 'DENY'
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/2.2/ref/csrf/
 CSRF_COOKIE_DOMAIN = None
+CSRF_COOKIE_SAMESITE = 'None'
 CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
 CSRF_COOKIE_SECURE = True
 CSRF_USE_SESSIONS = False
