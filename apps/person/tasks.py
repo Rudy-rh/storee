@@ -57,7 +57,6 @@ def send_verifycode_msisdn(data):
 
     to = data.get('msisdn', None)
     passcode = data.get('passcode', None)
-    print(to, passcode)
 
     if to and passcode:
         url = 'https://api.zuwinda.com/v1/message/send-sms'
@@ -67,6 +66,7 @@ def send_verifycode_msisdn(data):
         }
         headers = {'x-access-key': '928cfa5aac984a1c93bdd24da5dee441'}
         _r = requests.post(url, data=json.dumps(payload), headers=headers)
+        print(_r)
     else:
         logging.warning(
             _("Tried to send email to non-existing VerifyCode Code"))
