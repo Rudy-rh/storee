@@ -1,10 +1,10 @@
 from django.urls import path
 
 # LOCAL
-from .generator.views import CsrfTokenApiView
+from .generator.views import PingApiView
 
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
-    path('csrf/', CsrfTokenApiView.as_view(), name='csrf'),
+    path('ping/', PingApiView.as_view(), name='ping'),
 ]

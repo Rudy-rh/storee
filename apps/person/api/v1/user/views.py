@@ -11,6 +11,7 @@ from django.core.exceptions import (
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.core.validators import validate_email
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 # THIRD PARTY
 from rest_framework import status as response_status, viewsets
@@ -47,7 +48,7 @@ VerifyCode = get_model('person', 'VerifyCode')
 _PAGINATOR = LimitOffsetPagination()
 
 
-# @method_decorator(csrf_protect_drf, name='dispatch')
+@method_decorator([ensure_csrf_cookie, csrf_protect_drf], name='dispatch')
 class UserApiView(viewsets.ViewSet):
     """
     POST
@@ -537,7 +538,7 @@ class TokenObtainPairSerializerExtend(TokenObtainPairSerializer):
         return context
 
 
-@method_decorator(csrf_protect_drf, name='dispatch')
+@method_decorator([ensure_csrf_cookie, csrf_protect_drf], name='dispatch')
 class TokenObtainPairViewExtend(TokenObtainPairView):
     serializer_class = TokenObtainPairSerializerExtend
 

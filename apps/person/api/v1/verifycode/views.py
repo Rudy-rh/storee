@@ -3,6 +3,7 @@ from django.views.decorators.cache import never_cache
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from rest_framework import status as response_status, viewsets
 from rest_framework.permissions import AllowAny
@@ -16,7 +17,7 @@ from .serializers import CreateVerifyCodeSerializer, ValidateVerifyCodeSerialize
 VerifyCode = get_model('person', 'VerifyCode')
 
 
-@method_decorator(csrf_protect_drf, name='dispatch')
+@method_decorator([ensure_csrf_cookie, csrf_protect_drf], name='dispatch')
 class VerifyCodeApiView(viewsets.ViewSet):
     """
     POST

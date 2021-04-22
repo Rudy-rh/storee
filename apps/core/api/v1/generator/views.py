@@ -8,15 +8,12 @@ from rest_framework.response import Response
 from rest_framework import permissions
 
 
-class CsrfTokenApiView(APIView):
+class PingApiView(APIView):
     """
-    Generate CSRFtoken
+    Trigger request... result will generate cookie!
     """
     permission_classes = [permissions.AllowAny]
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request, format=None):
-        csrftoken = request.COOKIES.get('csrftoken')
-        if not csrftoken:
-            raise NotFound(detail=_("CSRF Token not set"))
-        return Response({'csrftoken': csrftoken})
+        return Response('PONG')

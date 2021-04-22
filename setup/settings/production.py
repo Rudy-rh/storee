@@ -54,7 +54,7 @@ CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 CSRF_TRUSTED_ORIGINS = [
     '.storeebarbershop.com',
-    'storee-46b6e.web.app'
+    '.web.app'
 ]
 
 
