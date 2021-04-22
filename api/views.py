@@ -1,4 +1,8 @@
-# THIRD PARTY
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.translation import gettext_lazy as _
+
+from rest_framework.decorators import api_view
+from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -19,9 +23,14 @@ class RootApiView(APIView):
                                  format=format, current_app='person'),
                 'verifycodes': reverse('person_api:verifycode-list', request=request,
                                        format=format, current_app='person'),
-            },
-            'core': {
-                'csrf': reverse('core_api:csrf', request=request,
-                                format=format, current_app='core'),
-            },
+            }
         })
+
+
+@api_view(['GET'])
+@ensure_csrf_cookie
+def ping(request):
+    csrftoken = request.COOKIES.get('csrftoken')
+    if not csrftoken:
+        raise NotFound(detail=_("CSRF Token not set"))
+    return Response({'csrftoken': csrftoken})
