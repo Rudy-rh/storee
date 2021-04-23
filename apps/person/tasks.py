@@ -61,15 +61,16 @@ def send_verifycode_msisdn(data):
     if to and passcode:
         url = 'https://api.zuwinda.com/v1/message/send-sms'
         payload = {
-            'content': 'Kode Verifikasi Storee Barber %s Jangan berikan kode OTP kepada siapapun!' % passcode,
-            'to': to
+            "content": "Kode Verifikasi Storee Barber % s Jangan berikan kode OTP kepada siapapun!" % passcode,
+            "to": to
         }
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
             'x-access-key': '928cfa5aac984a1c93bdd24da5dee441'
         }
-        _r = requests.post(url, data=json.dumps(payload), headers=headers)
+        r = requests.post(url, json=payload, headers=headers)
+        logging.info(r.status_code)
     else:
         logging.warning(
             _("Tried to send email to non-existing VerifyCode Code"))
