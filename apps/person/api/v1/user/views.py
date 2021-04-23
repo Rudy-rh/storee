@@ -36,13 +36,14 @@ from utils.generals import get_model
 from utils.pagination import build_result_pagination
 from utils.validators import csrf_protect_drf
 
+from apps.person import APP_LABEL
 from apps.person.utils.permissions import IsCurrentUserOrReject
 from apps.person.utils.auth import validate_username
 from apps.person.utils.password import ChangePassword, PasswordRecovery
 
 UserModel = get_user_model()
-Profile = get_model('person', 'Profile')
-VerifyCode = get_model('person', 'VerifyCode')
+Profile = get_model(APP_LABEL, 'Profile')
+VerifyCode = get_model(APP_LABEL, 'VerifyCode')
 
 # Define to avoid used ...().paginate__
 _PAGINATOR = LimitOffsetPagination()
@@ -70,8 +71,8 @@ class UserApiView(viewsets.ViewSet):
 
     def __init__(self, **kwargs):
         self._uuid = None
-        self._obj = None
-        self._objs = UserModel.objects.none()
+        self._instance = None
+        self._instances = UserModel.objects.none()
         self._context = {}
         super().__init__(**kwargs)
 
@@ -99,42 +100,40 @@ class UserApiView(viewsets.ViewSet):
     def dispatch(self, request, *args, **kwargs):
         # Must call first because will used everywhere
         self._uuid = kwargs.get('uuid')
-        self._objs = self._get_objs()
+        self._instances = self._get_instances()
         self._context = {'request': request}
         return super().dispatch(request, *args, **kwargs)
 
-    def _get_objs(self):
+    def _get_instances(self):
         """General query affected for entire object"""
-        query = UserModel.objects.prefetch_related('profile') \
+        return UserModel.objects.prefetch_related('profile') \
             .select_related('profile')
-        return query
 
-    def _get_obj(self):
+    def _get_instance(self):
         """Return single object"""
         try:
-            obj = self._objs.get(uuid=self._uuid)
+            return self._instances.get(uuid=self._uuid)
         except ObjectDoesNotExist:
             raise NotFound()
-        return obj
 
-    def _get_obj_for_update(self):
+    def _get_instance_for_update(self):
         """Return single object for update purpose"""
         try:
-            obj = self._objs.select_for_update() \
+            instance = self._instances.select_for_update() \
                 .get(uuid=self._uuid)
         except ObjectDoesNotExist:
             raise NotFound()
-        return obj
+        return instance
 
     # All Users
     def list(self, request, format=None):
         keyword = request.query_params.get('keyword')
-        objs = self._objs
+        instances = self._instances
         if keyword:
-            objs = objs.filter(Q(username__icontains=keyword)
-                               | Q(first_name__icontains=keyword))
+            instances = instances.filter(Q(username__icontains=keyword)
+                                         | Q(first_name__icontains=keyword))
 
-        paginator = _PAGINATOR.paginate_queryset(objs, request)
+        paginator = _PAGINATOR.paginate_queryset(instances, request)
         serializer = BaseUserSerializer(paginator, many=True, context=self._context,
                                         fields=('uuid', 'username', 'url', 'profile',))
         results = build_result_pagination(self, _PAGINATOR, serializer)
@@ -142,15 +141,15 @@ class UserApiView(viewsets.ViewSet):
 
     # Single User
     def retrieve(self, request, uuid=None, format=None):
-        obj = self._get_obj()
+        instance = self._get_instance()
 
         # limit fields when other user see the user
         fields = ('__all__')
         if str(request.user.uuid) != uuid:
             fields = ('uuid', 'username', 'url', 'profile', 'first_name',)
 
-        serializer = BaseUserSerializer(
-            obj, many=False, context=self._context, fields=fields)
+        serializer = BaseUserSerializer(instance, many=False, context=self._context,
+                                        fields=fields)
         return Response(serializer.data, status=response_status.HTTP_200_OK)
 
     # Register User
@@ -183,8 +182,8 @@ class UserApiView(viewsets.ViewSet):
     @method_decorator(never_cache)
     @transaction.atomic
     def partial_update(self, request, uuid=None, format=None):
-        obj = self._get_obj_for_update()
-        serializer = UpdateUserSerializer(obj, data=request.data,
+        instance = self._get_instance_for_update()
+        serializer = UpdateUserSerializer(instance, data=request.data,
                                           partial=True, context=self._context)
 
         if serializer.is_valid(raise_exception=True):
@@ -203,8 +202,9 @@ class UserApiView(viewsets.ViewSet):
             return Response(status=response_status.HTTP_401_UNAUTHORIZED)
 
         self._uuid = user.uuid
-        obj = self._get_obj()
-        serializer = BaseUserSerializer(obj, many=False, context=self._context)
+        instance = self._get_instance()
+        serializer = BaseUserSerializer(instance, many=False,
+                                        context=self._context)
         return Response(serializer.data, status=response_status.HTTP_200_OK)
 
     # Sub-action logout!
@@ -515,7 +515,7 @@ class UserApiView(viewsets.ViewSet):
         # Finally, set the password
         try:
             changer.save_password()
-        except ValidationError as e:
+        except DjangoValidationError as e:
             raise ValidationError(detail=' '.join(e))
 
         return Response({'detail': _("Password berhasil diperbarui. "
