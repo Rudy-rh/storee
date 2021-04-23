@@ -1,7 +1,6 @@
 import logging
 import smtplib
 import requests
-import json
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -61,7 +60,7 @@ def send_verifycode_msisdn(data):
     if to and passcode:
         url = 'https://api.zuwinda.com/v1/message/send-sms'
         payload = {
-            "content": "Kode Verifikasi Storee Barber %s Jangan berikan ini kepada siapapun!" % passcode,
+            "content": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode,
             "to": to
         }
         headers = {
