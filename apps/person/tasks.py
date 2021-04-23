@@ -61,7 +61,7 @@ def send_verifycode_msisdn(data):
     if to and passcode:
         url = 'https://api.zuwinda.com/v1/message/send-sms'
         payload = {
-            "content": "Masukkan kode Verifikasi Storee Barber %s Jangan berikan kode ini kepada siapapun!" % passcode,
+            "content": "Kode Verifikasi Storee Barber %s Jangan berikan ini kepada siapapun!" % passcode,
             "to": to
         }
         headers = {
