@@ -6,11 +6,12 @@ from .base import *
 
 # GLOBAL CONFIGURATIONS
 APP_NAME = 'Storee'
-PROJECT_URL = 'www.storee.com'
+PROJECT_URL = 'www.storeebarbershop.com'
 PAGINATION_PER_PAGE = 15
 LOGIN_WITH_JWT = True
 # If true in recovery password need make sure account exist
 RECOVERY_PASSWORD_CHECK_ACCOUNT = True
+ZUWINDA_SMS_KEY = '928cfa5aac984a1c93bdd24da5dee441'
 
 
 # REGISTRATION REQUIREMENTS
@@ -18,12 +19,6 @@ USER_EMAIL_FIELD = 'email'
 USER_MSISDN_FIELD = 'msisdn'
 USER_REQUIRED_VERIFICATION = True
 USER_VERIFICATION_FIELDS = ['email', 'msisdn']
-
-STRICT_EMAIL = True
-STRICT_EMAIL_VERIFIED = True
-
-STRICT_MSISDN = False
-STRICT_MSISDN_VERIFIED = False
 
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/person/login/'

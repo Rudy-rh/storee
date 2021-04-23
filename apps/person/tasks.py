@@ -61,13 +61,13 @@ def send_verifycode_msisdn(data):
     if to and passcode:
         url = 'https://api.zuwinda.com/v1/message/send-sms'
         payload = {
-            "content": "Masukkan kode Verifikasi Storee Barber % s Jangan berikan kode ini kepada siapapun!" % passcode,
+            "content": "Masukkan kode Verifikasi Storee Barber %s Jangan berikan kode ini kepada siapapun!" % passcode,
             "to": to
         }
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'x-access-key': '928cfa5aac984a1c93bdd24da5dee441'
+            'x-access-key': settings.ZUWINDA_SMS_KEY
         }
         r = requests.post(url, json=payload, headers=headers)
         logging.info(r.status_code)
