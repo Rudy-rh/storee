@@ -64,9 +64,12 @@ def send_verifycode_msisdn(data):
             'content': 'Kode Verifikasi Storee Barber %s Jangan berikan kode OTP kepada siapapun!' % passcode,
             'to': to
         }
-        headers = {'x-access-key': '928cfa5aac984a1c93bdd24da5dee441'}
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'x-access-key': '928cfa5aac984a1c93bdd24da5dee441'
+        }
         _r = requests.post(url, data=json.dumps(payload), headers=headers)
-        print(_r)
     else:
         logging.warning(
             _("Tried to send email to non-existing VerifyCode Code"))
