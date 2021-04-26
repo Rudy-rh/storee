@@ -34,9 +34,10 @@ class LoginBackend(ModelBackend):
         if username is None:
             username = kwargs.get(UserModel.USERNAME_FIELD)
 
+        is_verified = settings.USER_REQUIRED_VERIFICATION
         obtain = Q(username__iexact=username) \
-            | (Q(email__iexact=username) & Q(is_email_verified=True)) \
-            | (Q(msisdn__iexact=username) & Q(is_msisdn_verified=True))
+            | (Q(email__iexact=username) & Q(is_email_verified=is_verified)) \
+            | (Q(msisdn__iexact=username) & Q(is_msisdn_verified=is_verified))
 
         try:
             # user = UserModel._default_manager.get_by_natural_key(username)
@@ -51,8 +52,8 @@ class LoginBackend(ModelBackend):
                 user = user.get(obtain)
             except UserModel.MultipleObjectsReturned:
                 message = _(
-                    "User {} more than one. "
-                    "If is you, login and verify your account".format(username))
+                    "{} has used. "
+                    "If this is you, use Forgot Password verify account".format(username))
                 raise ValueError(message)
             except UserModel.DoesNotExist:
                 return None

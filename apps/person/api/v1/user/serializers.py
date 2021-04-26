@@ -4,13 +4,12 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import transaction, IntegrityError
 from django.contrib.auth import get_user_model
-from django.db.models.fields import CharField
 from django.utils.translation import ugettext_lazy as _
-from django.core.validators import EmailValidator, validate_email
+from django.utils.text import slugify
+from django.core.validators import EmailValidator
 
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.fields import empty
 
 from utils.generals import get_model
 from apps.person.api.validator import (
@@ -155,7 +154,8 @@ class BaseUserSerializer(DynamicFields, serializers.ModelSerializer):
         verification = attrs.pop('verification', {}) \
             or self.initial_data.pop('verification', {})
 
-        if self._verify_field and self._verify_value:
+        if (self._verify_field and self._verify_value) \
+                and settings.USER_REQUIRED_VERIFICATION:
             self._run_verification(verification)
         return super().validate(attrs)
 
@@ -200,7 +200,10 @@ class CreateUserSerializer(BaseUserSerializer):
         if 'username' not in data:
             # current date and time
             now = datetime.now()
-            data['username'] = str(datetime.timestamp(now)).split('.', 1)[0]
+            xchar = data['first_name'][:4]
+            xtime = str(datetime.timestamp(now)).split('.', 1)[0]
+            username = slugify('{}-{}'.format(xchar, xtime))
+            data['username'] = username
 
         return super().to_internal_value(data)
 
