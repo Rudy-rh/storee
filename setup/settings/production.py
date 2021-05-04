@@ -33,8 +33,8 @@ sentry_sdk.init(
 # https://docs.djangoproject.com/en/2.2/ref/settings/
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = False
-SESSION_COOKIE_SAMESITE = 'None'
 
+SECURE_REFERRER_POLICY = 'same-origin'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_SSL_REDIRECT = True
