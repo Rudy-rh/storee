@@ -23,6 +23,14 @@ class RootApiView(APIView):
                                  format=format, current_app='person'),
                 'verifycodes': reverse('person_api:verifycode-list', request=request,
                                        format=format, current_app='person'),
+            },
+            'barber': {
+                'barbermans': reverse('barber_api:barberman-list', request=request,
+                                      format=format, current_app='barber'),
+                'styles': reverse('barber_api:style-list', request=request,
+                                  format=format, current_app='barber'),
+                'bookings': reverse('barber_api:booking-list', request=request,
+                                    format=format, current_app='barber'),
             }
         })
 

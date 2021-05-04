@@ -31,9 +31,9 @@ WSGI_APPLICATION = 'setup.wsgi.application'
 ASGI_APPLICATION = 'setup.asgi.application'
 IS_UNIX = os.name != 'nt'
 
-HOST = '127.0.0.1' # windows
+HOST = '127.0.0.1'  # windows
 if IS_UNIX:
-    HOST = '127.0.0.1' # ubuntu
+    HOST = '127.0.0.1'  # ubuntu
 
 
 # Application definition
@@ -91,7 +91,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
-LANGUAGE_CODE = 'id-ID'
+# LANGUAGE_CODE = 'id-ID'
 TIME_ZONE = 'Asia/Jakarta'
 USE_I18N = True
 USE_L10N = True

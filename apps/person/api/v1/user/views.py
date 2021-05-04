@@ -527,13 +527,21 @@ class TokenObtainPairSerializerExtend(TokenObtainPairSerializer):
     def validate(self, attrs):
         context = {}
         data = super().validate(attrs)
-
         serializer = BaseUserSerializer(self.user, many=False,
                                         context=self.context)
 
+        roles = {
+            'is_cashier': self.user.is_cashier,
+            'is_barberman': self.user.is_barberman,
+            'is_customer': self.user.is_customer,
+        }
+
+        user = {'roles': roles}
+        user.update(serializer.data)
+
         context.update({
             'token': data,
-            'user': serializer.data
+            'user': user
         })
         return context
 

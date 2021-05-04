@@ -60,6 +60,18 @@ class User(AbstractUser):
         full_name = '{}{}'.format(self.first_name, ' ' + self.last_name)
         return full_name if self.first_name else self.username
 
+    @property
+    def is_customer(self):
+        return self.groups.filter(name__in=["Customer"]).exists()
+
+    @property
+    def is_barberman(self):
+        return self.groups.filter(name__in=["Barberman"]).exists()
+
+    @property
+    def is_cashier(self):
+        return self.groups.filter(name__in=["Cashier"]).exists()
+
     def mark_email_verified(self):
         self.is_email_verified = True
         self.save(update_fields=['is_email_verified'])

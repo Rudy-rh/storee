@@ -14,10 +14,11 @@ class AbstractStyleCategory(AbstractCommonField):
 
 
 class AbstractStyleItem(AbstractCommonField):
-    style_category = models.ForeignKey('barber.StyleCategory', on_delete=models.CASCADE,
-                                       related_name='items')
+    style_category = models.OneToOneField('barber.StyleCategory', on_delete=models.CASCADE,
+                                          related_name='items')
 
-    label = models.CharField(max_length=255, null=True, blank=True)
+    label = models.CharField(max_length=255, null=True, blank=True,
+                             editable=False)
 
     class Meta:
         abstract = True
@@ -25,6 +26,10 @@ class AbstractStyleItem(AbstractCommonField):
 
     def __str__(self) -> str:
         return self.label or self.style_category.label
+
+    def save(self, *args, **kwargs):
+        self.label = self.style_category.label
+        super().save(*args, **kwargs)
 
 
 class AbstractStyleAttachment(AbstractCommonField):
