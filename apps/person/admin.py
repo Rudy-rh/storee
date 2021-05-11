@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
 
 from utils.generals import get_model
-from apps.person.forms import UserChangeFormExtend, UserCreationFormExtend
+from .forms import UserChangeFormExtend, UserCreationFormExtend
 
 User = get_model('person', 'User')
 Profile = get_model('person', 'Profile')

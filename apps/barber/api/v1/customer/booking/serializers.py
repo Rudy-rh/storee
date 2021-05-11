@@ -34,7 +34,7 @@ class CreateBookingSerializer(serializers.ModelSerializer):
 
 
 class BaseBookingSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='barber_api:booking-detail',
+    url = serializers.HyperlinkedIdentityField(view_name='barber_api:customer:booking-detail',
                                                lookup_field='uuid', read_only=True)
     reserved_type = serializers.SerializerMethodField()
     styleitem = serializers.SerializerMethodField()

@@ -14,7 +14,7 @@ from django.core.validators import validate_email
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 # THIRD PARTY
-from rest_framework import status as response_status, viewsets
+from rest_framework import serializers, status as response_status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -28,7 +28,12 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 # SERIALIZERS
-from .serializers import BaseUserSerializer, CreateUserSerializer, UpdateUserSerializer
+from .serializers import (
+    BaseUserSerializer,
+    CreateUserSerializer,
+    UpdateUserSerializer,
+    RetrieveUserSerializer
+)
 from ..profile.serializers import ProfileSerializer
 
 # GET MODELS FROM GLOBAL UTILS
@@ -36,14 +41,13 @@ from utils.generals import get_model
 from utils.pagination import build_result_pagination
 from utils.validators import csrf_protect_drf
 
-from apps.person import APP_LABEL
 from apps.person.utils.permissions import IsCurrentUserOrReject
 from apps.person.utils.auth import validate_username
 from apps.person.utils.password import ChangePassword, PasswordRecovery
 
 UserModel = get_user_model()
-Profile = get_model(APP_LABEL, 'Profile')
-VerifyCode = get_model(APP_LABEL, 'VerifyCode')
+Profile = get_model('person', 'Profile')
+VerifyCode = get_model('person', 'VerifyCode')
 
 # Define to avoid used ...().paginate__
 _PAGINATOR = LimitOffsetPagination()
@@ -57,11 +61,14 @@ class UserApiView(viewsets.ViewSet):
         If :email provided :msisdn not required
         If :email NOT provide :msisdn required
 
+        If :groups not define will used Customer as default groups
+
         {
             "password": "string with special character",
             "username": "string",
             "email": "string email",
             "msisdn": "string number",
+            "groups": "string",                             [optional]
             "verification": {
                 "passcode": "123456",
                 "challenge": "email_validation",
@@ -148,8 +155,8 @@ class UserApiView(viewsets.ViewSet):
         if str(request.user.uuid) != uuid:
             fields = ('uuid', 'username', 'url', 'profile', 'first_name',)
 
-        serializer = BaseUserSerializer(instance, many=False, context=self._context,
-                                        fields=fields)
+        serializer = RetrieveUserSerializer(instance, many=False, context=self._context,
+                                            fields=fields)
         return Response(serializer.data, status=response_status.HTTP_200_OK)
 
     # Register User
@@ -164,18 +171,27 @@ class UserApiView(viewsets.ViewSet):
 
         serializer = CreateUserSerializer(data=request.data,
                                           context=self._context)
-
         if serializer.is_valid(raise_exception=True):
+            error_status = response_status.HTTP_406_NOT_ACCEPTABLE
+            error_code = None
+            error_content = None
+
             try:
                 serializer.save()
             except ValidationError as e:
-                _code = getattr(e, 'code', None)
-                _status = response_status.HTTP_406_NOT_ACCEPTABLE
-                if _code == 'verification_failure':
-                    _status = response_status.HTTP_401_UNAUTHORIZED
+                error_content = e
+                error_code = getattr(e, 'code', None)
+                if error_code == 'verification_failure':
+                    error_status = response_status.HTTP_401_UNAUTHORIZED
+            except ValueError as e:
+                error_content = str(e)
 
-                return Response({'detail': e}, status=_status)
-            return Response(serializer.data, status=response_status.HTTP_201_CREATED)
+            if error_content:
+                return Response({'detail': error_content}, status=error_status)
+
+            _serializer = RetrieveUserSerializer(serializer.instance, many=False,
+                                                 context=self._context)
+            return Response(_serializer.data, status=response_status.HTTP_201_CREATED)
         return Response(serializer.errors, status=response_status.HTTP_400_BAD_REQUEST)
 
     # Update basic user data
@@ -192,7 +208,6 @@ class UserApiView(viewsets.ViewSet):
         return Response(serializer.errors, status=response_status.HTTP_400_BAD_REQUEST)
 
     # Sub-action return single user
-    @method_decorator(never_cache)
     @transaction.atomic
     @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated],
             url_path='me', url_name='me')
@@ -432,6 +447,7 @@ class UserApiView(viewsets.ViewSet):
                 "verifycode_email": "string",
                 "verifycode_msisdn": "string",
                 "verifycode_passcode": "string",
+                "verifycode_token": "string",
                 "new_password": "string",
                 "retype_password": "string",
                 "password_token": "string",
@@ -461,20 +477,19 @@ class UserApiView(viewsets.ViewSet):
 
         new_password = request.data.get('new_password')
         retype_password = request.data.get('retype_password')
-        uidb64 = request.data.get('password_uidb64')
-        token = request.data.get('password_token')
-        passcode = request.data.get('verifycode_passcode')
+        password_uidb64 = request.data.get('password_uidb64')
+        password_token = request.data.get('password_token')
+        verifycode_passcode = request.data.get('verifycode_passcode')
+        verifycode_token = request.data.get('verifycode_token')
 
         # Init recovery function
         # If all passed will return None
         recover = PasswordRecovery(new_password, retype_password,
-                                   token, uidb64)
+                                   password_token, password_uidb64)
 
         # Check and validate verifycode
-        verifycode_token = request.session.get(
-            'verifycode_token') if request else None
         recover.get_verifycode(verifycode_token, verifycode_field.replace('verifycode_', ''),
-                               verifycode_value, passcode)
+                               verifycode_value, verifycode_passcode)
 
         # Finally, set the password
         try:
@@ -524,24 +539,17 @@ class UserApiView(viewsets.ViewSet):
 
 
 class TokenObtainPairSerializerExtend(TokenObtainPairSerializer):
+    groups = serializers.ListField(required=False)
+
     def validate(self, attrs):
         context = {}
         data = super().validate(attrs)
-        serializer = BaseUserSerializer(self.user, many=False,
-                                        context=self.context)
-
-        roles = {
-            'is_cashier': self.user.is_cashier,
-            'is_barberman': self.user.is_barberman,
-            'is_customer': self.user.is_customer,
-        }
-
-        user = {'roles': roles}
-        user.update(serializer.data)
+        serializer = RetrieveUserSerializer(self.user, many=False,
+                                            context=self.context)
 
         context.update({
             'token': data,
-            'user': user
+            'user': serializer.data
         })
         return context
 
@@ -559,6 +567,8 @@ class TokenObtainPairViewExtend(TokenObtainPairView):
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0])
+        except ValueError as e:
+            raise ValidationError({'detail': str(e)})
 
         # Make user logged-in
         if settings.LOGIN_WITH_JWT:

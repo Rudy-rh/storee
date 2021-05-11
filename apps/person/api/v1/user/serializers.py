@@ -3,10 +3,12 @@ from datetime import datetime
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import transaction, IntegrityError
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 from django.utils.text import slugify
 from django.core.validators import EmailValidator
+from django.contrib.auth.models import Group
 
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -78,7 +80,7 @@ class BaseUserSerializer(DynamicFields, serializers.ModelSerializer):
 
     class Meta:
         model = User
-        exclude = ('id', 'user_permissions', 'groups', 'date_joined',
+        exclude = ('id', 'user_permissions', 'date_joined',
                    'is_superuser', 'last_login', 'is_staff',)
         extra_kwargs = {
             'password': {
@@ -123,13 +125,11 @@ class BaseUserSerializer(DynamicFields, serializers.ModelSerializer):
         this function will check that
         """
 
-        request = self.context.get('request')
         verify_field_value = {self._verify_field: self._verify_value}
-        token = request.session.get('verifycode_token') if request else None
 
         try:
             self._verifycode_obj = VerifyCode.objects.select_for_update() \
-                .verified_unused(token=token, **verification, **verify_field_value)
+                .verified_unused(**verification, **verify_field_value)
         except ObjectDoesNotExist:
             raise CustomExcpetion({'verification': _("{} belum diverifikasi".format(self._verify_field.upper()))},
                                   status_code=status.HTTP_401_UNAUTHORIZED)
@@ -163,6 +163,13 @@ class BaseUserSerializer(DynamicFields, serializers.ModelSerializer):
 class CreateUserSerializer(BaseUserSerializer):
     # Added some requirement for register
     retype_password = serializers.CharField(max_length=255, write_only=True)
+    groups = serializers.SlugRelatedField(slug_field='name', write_only=True,
+                                          required=False, queryset=Group.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._groups = None
+        self._groups_instance = None
 
     def get_extra_kwargs(self):
         kwargs = super().get_extra_kwargs()
@@ -176,20 +183,6 @@ class CreateUserSerializer(BaseUserSerializer):
             kwargs['first_name']['required'] = False
 
         return kwargs
-
-    def validate(self, data):
-        # can't use both email and msisdn
-        if EMAIL_FIELD in data and MSISDN_FIELD in data:
-            raise ValidationError(
-                {'field_error': _("Can't use both email and msisdn")})
-
-        # confirm password
-        password = data.get('password')
-        retype_password = data.pop('retype_password')
-        if password != retype_password:
-            raise ValidationError(
-                {'retype_password': _("Password tidak sama")})
-        return super().validate(data)
 
     def to_internal_value(self, data):
         # use username as first_name
@@ -205,7 +198,39 @@ class CreateUserSerializer(BaseUserSerializer):
             username = slugify('{}-{}'.format(xchar, xtime))
             data['username'] = username
 
+        # get groups
+        self._groups = data.pop('groups', None)  \
+            or self.initial_data.pop('groups', None)
         return super().to_internal_value(data)
+
+    def validate(self, data):
+        # can't use both email and msisdn
+        if EMAIL_FIELD in data and MSISDN_FIELD in data:
+            raise ValidationError(
+                {'field_error': _("Can't use both email and msisdn")})
+
+        # confirm password
+        password = data.get('password')
+        retype_password = data.pop('retype_password')
+        if password != retype_password:
+            raise ValidationError({
+                'retype_password': _("Password tidak sama")
+            })
+
+        # get groups instance
+        # if not exists use default groups
+        q_groups = Q()
+        if self._groups:
+            q_groups = Q(name=self._groups)
+        else:
+            q_groups = Q(is_default=True)
+
+        try:
+            self._groups_instance = Group.objects.get(q_groups)
+        except ObjectDoesNotExist:
+            pass
+
+        return super().validate(data)
 
     @transaction.atomic
     def create(self, validated_data):
@@ -213,6 +238,9 @@ class CreateUserSerializer(BaseUserSerializer):
             instance = UserModel.objects.create_user(**validated_data)
         except (IntegrityError, TypeError, ValueError) as e:
             raise DjangoValidationError(str(e))
+
+        if self._groups_instance:
+            self._groups_instance.user_set.add(instance)
 
         # mark verifycode as used
         if self._verifycode_obj:
@@ -243,3 +271,27 @@ class UpdateUserSerializer(BaseUserSerializer):
         if self._verifycode_obj:
             self._verifycode_obj.mark_used()
         return instance
+
+
+class RetrieveUserSerializer(BaseUserSerializer):
+    groups = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='name'
+    )
+    roles = serializers.SerializerMethodField()
+    url = None
+
+    class Meta:
+        model = User
+        exclude = ('password', 'is_superuser',)
+        depth = 1
+
+    def get_roles(self, instance):
+        roles = {
+            'is_cashier': instance.is_cashier,
+            'is_barberman': instance.is_barberman,
+            'is_customer': instance.is_customer,
+        }
+
+        return roles

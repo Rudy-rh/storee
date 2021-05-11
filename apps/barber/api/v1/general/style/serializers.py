@@ -4,6 +4,7 @@ from utils.generals import get_model
 StyleCategory = get_model('barber', 'StyleCategory')
 StyleItem = get_model('barber', 'StyleItem')
 StyleAttachment = get_model('barber', 'StyleAttachment')
+StyleOfTheYear = get_model('barber', 'StyleOfTheYear')
 
 
 class ListStyleAttachmentSerializer(serializers.ModelSerializer):
@@ -22,7 +23,7 @@ class ListStyleItemSerializer(serializers.ModelSerializer):
 
 
 class ListStyleSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='barber_api:style-detail',
+    url = serializers.HyperlinkedIdentityField(view_name='barber_api:general:style-detail',
                                                lookup_field='uuid', read_only=True)
     items = ListStyleItemSerializer(many=False)
 
@@ -36,4 +37,10 @@ class RetrieveStyleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StyleCategory
+        fields = '__all__'
+
+
+class ListStyleOfTheYearSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StyleOfTheYear
         fields = '__all__'

@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from .abstract import AbstractCommonField
 
@@ -45,3 +47,42 @@ class AbstractStyleAttachment(AbstractCommonField):
 
     def __str__(self) -> str:
         return self.label or self.image.name
+
+
+class AbstractStyleOfTheYear(AbstractCommonField):
+    label = models.CharField(max_length=255, null=True, blank=True)
+    image = models.ImageField(upload_to='style/soty')
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+
+    def __str__(self) -> str:
+        return self.label or self.image.name
+
+    def save(self, *args, **kwargs):
+        if not self.label:
+            base = os.path.basename(self.image.name)
+            self.label = base
+        super().save(*args, **kwargs)
+
+
+class AbstractBrochure(AbstractCommonField):
+    label = models.CharField(max_length=255, null=True, blank=True)
+    image = models.ImageField(upload_to='brochure')
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+
+    def __str__(self) -> str:
+        return self.label or self.image.name
+
+    def save(self, *args, **kwargs):
+        if not self.label:
+            base = os.path.basename(self.image.name)
+            self.label = base
+        super().save(*args, **kwargs)

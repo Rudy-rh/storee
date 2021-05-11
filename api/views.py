@@ -25,12 +25,20 @@ class RootApiView(APIView):
                                        format=format, current_app='person'),
             },
             'barber': {
-                'barbermans': reverse('barber_api:barberman-list', request=request,
+                'customer': {
+                    'bookings': reverse('barber_api:customer:booking-list', request=request,
+                                        format=format, current_app='barber'),
+                },
+                'general': {
+                    'styles': reverse('barber_api:general:style-list', request=request,
                                       format=format, current_app='barber'),
-                'styles': reverse('barber_api:style-list', request=request,
-                                  format=format, current_app='barber'),
-                'bookings': reverse('barber_api:booking-list', request=request,
-                                    format=format, current_app='barber'),
+                    'styles-oty': reverse('barber_api:general:style_oty-list', request=request,
+                                          format=format, current_app='barber'),
+                    'barbermans': reverse('barber_api:general:barberman-list', request=request,
+                                          format=format, current_app='barber'),
+                    'brochures': reverse('barber_api:general:brochure-list', request=request,
+                                         format=format, current_app='barber'),
+                }
             }
         })
 

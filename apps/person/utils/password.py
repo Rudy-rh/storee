@@ -6,8 +6,6 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from apps.person import APP_LABEL
-
 UserModel = get_user_model()
 
 
@@ -53,7 +51,7 @@ class PasswordRecovery:
         return user
 
     def get_verifycode(self, token, field, value, passcode):
-        VerifyCode = get_model(APP_LABEL, 'VerifyCode')
+        VerifyCode = get_model('person', 'VerifyCode')
         obtain = {field: value}
         challenge = 'password_recovery'
 

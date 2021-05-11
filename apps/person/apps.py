@@ -10,7 +10,11 @@ class PersonConfig(AppConfig):
     def ready(self):
         from django.conf import settings
         from django.contrib.auth.models import Group
-        from .signals import user_save_handler, group_save_handler, verifycode_save_handler
+        from .signals import (
+            user_save_handler,
+            group_save_handler,
+            verifycode_save_handler
+        )
 
         VerifyCode = self.get_model('VerifyCode')
 
@@ -25,6 +29,3 @@ class PersonConfig(AppConfig):
         # Group
         post_save.connect(group_save_handler, sender=Group,
                           dispatch_uid='group_save_signal')
-
-
-APP_LABEL = '%s' % PersonConfig.label

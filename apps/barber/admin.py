@@ -5,10 +5,12 @@ from utils.generals import get_model
 StyleCategory = get_model('barber', 'StyleCategory')
 StyleItem = get_model('barber', 'StyleItem')
 StyleAttachment = get_model('barber', 'StyleAttachment')
+StyleOfTheYear = get_model('barber', 'StyleOfTheYear')
 Booking = get_model('barber', 'Booking')
 Branch = get_model('barber', 'Branch')
 BranchBarberman = get_model('barber', 'BranchBarberman')
 BranchCashier = get_model('barber', 'BranchCashier')
+Brochure = get_model('barber', 'Brochure')
 
 
 class StyleAttachmentInline(admin.StackedInline):
@@ -35,5 +37,7 @@ class BranchExtend(admin.ModelAdmin):
 
 admin.site.register(StyleCategory)
 admin.site.register(StyleItem, StyleItemExtend)
+admin.site.register(StyleOfTheYear)
 admin.site.register(Booking)
 admin.site.register(Branch, BranchExtend)
+admin.site.register(Brochure)

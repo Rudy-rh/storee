@@ -47,14 +47,7 @@ class BaseVerifyCodeSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._objects_model = self.Meta.model.objects
-
-
-class CreateVerifyCodeSerializer(BaseVerifyCodeSerializer):
-    def validate(self, data):
-        # can't use both email and msisdn
-        if EMAIL_FIELD in data and MSISDN_FIELD in data:
-            raise NotAcceptable(_("Can't use both email and msisdn"))
-        return super().validate(data)
+        self._request = self.context.get('request')
 
     def get_extra_kwargs(self):
         kwargs = super().get_extra_kwargs()
@@ -71,6 +64,18 @@ class CreateVerifyCodeSerializer(BaseVerifyCodeSerializer):
 
         return kwargs
 
+
+class CreateVerifyCodeSerializer(BaseVerifyCodeSerializer):
+    class Meta(BaseVerifyCodeSerializer.Meta):
+        model = VerifyCode
+        fields = ('email', 'msisdn', 'challenge',)
+
+    def validate(self, data):
+        # can't use both email and msisdn
+        if EMAIL_FIELD in data and MSISDN_FIELD in data:
+            raise NotAcceptable(_("Can't use both email and msisdn"))
+        return super().validate(data)
+
     @transaction.atomic
     def create(self, validated_data):
         request = self.context.get('request', None)
@@ -85,17 +90,16 @@ class CreateVerifyCodeSerializer(BaseVerifyCodeSerializer):
 
         # If `valid_until` greater than time now we update VerifyCode Code
         obj, _created = self._objects_model.generate(data={**validated_data})
-
-        if request:
-            # save verifycode token to session
-            request.session['verifycode_token'] = obj.token
         return obj
 
 
 class ValidateVerifyCodeSerializer(BaseVerifyCodeSerializer):
+    class Meta(BaseVerifyCodeSerializer.Meta):
+        model = VerifyCode
+        fields = ('email', 'msisdn', 'challenge', 'token',)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._request = self.context.get('request')
         self._passcode = self.context.get('passcode')
         self._user = None
 
@@ -121,17 +125,18 @@ class ValidateVerifyCodeSerializer(BaseVerifyCodeSerializer):
 
     def to_internal_value(self, data):
         ret = super().to_internal_value(data)
-        token = self._request.session.get('verifycode_token')
 
         try:
             self.instance = self._instance_query \
-                .unverified_unused(**ret, token=token, passcode=self._passcode)
+                .unverified_unused(**ret, passcode=self._passcode)
         except ObjectDoesNotExist:
             raise NotAcceptable(detail=_("Kode verifikasi invalid"))
         return ret
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
+
+        # return value if password recovery
         if instance.challenge == VerifyCode.ChallengeType.PASSWORD_RECOVERY:
             password_token = None
             password_uidb64 = None
@@ -172,3 +177,13 @@ class ValidateVerifyCodeSerializer(BaseVerifyCodeSerializer):
                 user.mark_msisdn_verified()
 
         return instance
+
+
+class RetrieveVerifyCodeSerialzer(BaseVerifyCodeSerializer):
+    token = serializers.CharField(read_only=True)
+    passcode = serializers.CharField(read_only=True)
+
+    class Meta(BaseVerifyCodeSerializer.Meta):
+        model = VerifyCode
+        fields = ('email', 'msisdn', 'challenge', 'token',
+                  'valid_until', 'is_verified', 'passcode',)

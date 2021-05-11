@@ -35,6 +35,15 @@ if not is_model_registered('barber', 'StyleAttachment'):
 
 
 # 4
+if not is_model_registered('barber', 'StyleOfTheYear'):
+    class StyleOfTheYear(AbstractStyleOfTheYear):
+        class Meta(AbstractStyleOfTheYear.Meta):
+            db_table = 'barber_style_oty'
+
+    __all__.append('StyleOfTheYear')
+
+
+# 5
 if not is_model_registered('barber', 'Booking'):
     class Booking(AbstractBooking):
         class Meta(AbstractBooking.Meta):
@@ -43,7 +52,7 @@ if not is_model_registered('barber', 'Booking'):
     __all__.append('Booking')
 
 
-# 5
+# 6
 if not is_model_registered('barber', 'Branch'):
     class Branch(AbstractBranch):
         class Meta(AbstractBranch.Meta):
@@ -52,7 +61,7 @@ if not is_model_registered('barber', 'Branch'):
     __all__.append('Branch')
 
 
-# 6
+# 7
 if not is_model_registered('barber', 'BranchBarberman'):
     class BranchBarberman(AbstractBranchBarberman):
         class Meta(AbstractBranchBarberman.Meta):
@@ -61,10 +70,19 @@ if not is_model_registered('barber', 'BranchBarberman'):
     __all__.append('BranchBarberman')
 
 
-# 7
+# 8
 if not is_model_registered('barber', 'BranchCashier'):
     class BranchCashier(AbstractBranchCashier):
         class Meta(AbstractBranchCashier.Meta):
             db_table = 'barber_branch_cashier'
 
     __all__.append('BranchCashier')
+
+
+# 9
+if not is_model_registered('barber', 'Brochure'):
+    class Brochure(AbstractBrochure):
+        class Meta(AbstractBrochure.Meta):
+            db_table = 'barber_brochure'
+
+    __all__.append('Brochure')

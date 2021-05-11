@@ -1,13 +1,14 @@
 
 from django.shortcuts import redirect
-from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.contrib.auth.forms import _unicode_ci_compare
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ObjectDoesNotExist
 
 validate_username = UnicodeUsernameValidator()
 UserModel = get_user_model()
@@ -31,13 +32,24 @@ class LoginBackend(ModelBackend):
     """Login w/h username or email"""
 
     def authenticate(self, request, username=None, password=None, **kwargs):
+        groups = []
+        if hasattr(request, 'data'):
+            groups = request.data.get('groups', [])
+
+        if len(groups) == 0:
+            # Use default groups
+            try:
+                groups = Group.objects.filter(is_default=True) \
+                    .values_list('name', flat=True)
+            except ObjectDoesNotExist:
+                pass
+
         if username is None:
             username = kwargs.get(UserModel.USERNAME_FIELD)
 
-        is_verified = settings.USER_REQUIRED_VERIFICATION
         obtain = Q(username__iexact=username) \
-            | (Q(email__iexact=username) & Q(is_email_verified=is_verified)) \
-            | (Q(msisdn__iexact=username) & Q(is_msisdn_verified=is_verified))
+            | Q(email__iexact=username) \
+            | Q(msisdn__iexact=username)
 
         try:
             # user = UserModel._default_manager.get_by_natural_key(username)
@@ -57,6 +69,11 @@ class LoginBackend(ModelBackend):
                 raise ValueError(message)
             except UserModel.DoesNotExist:
                 return None
+
+            if not user.is_staff or not user.is_superuser:
+                # check user groups
+                if not user.groups.filter(name__in=groups).exists():
+                    raise ValueError(_("Fail user doesn't have Groups"))
 
             if user and user.check_password(password) and self.user_can_authenticate(user):
                 return user
@@ -79,12 +96,12 @@ def get_users_by_email(email):
     resetting their password.
     """
     email_field_name = UserModel.get_email_field_name()
-    active_users = UserModel._default_manager.filter(**{
+    users = UserModel._default_manager.filter(**{
         '%s__iexact' % email_field_name: email,
         'is_active': True,
     })
     return (
-        u for u in active_users
+        u for u in users
         if u.has_usable_password() and
         _unicode_ci_compare(email, getattr(u, email_field_name))
     )
@@ -97,12 +114,12 @@ def get_users_by_username(username):
     resetting their password.
     """
     username_field_name = 'username'
-    active_users = UserModel._default_manager.filter(**{
+    users = UserModel._default_manager.filter(**{
         '%s__iexact' % username_field_name: username,
         'is_active': True,
     })
     return (
-        u for u in active_users
+        u for u in users
         if u.has_usable_password() and
         _unicode_ci_compare(username, getattr(u, username_field_name))
     )
@@ -112,12 +129,12 @@ def get_users_by(field='email', value=None):
     """
     :field accepted email, msisdn and username, default email
     """
-    active_users = UserModel._default_manager.filter(**{
+    users = UserModel._default_manager.filter(**{
         '%s__iexact' % field: value,
         'is_active': True,
     })
     return (
-        u for u in active_users
+        u for u in users
         if u.has_usable_password() and
         _unicode_ci_compare(value, getattr(u, field))
     )
@@ -134,13 +151,12 @@ def clear_verifycode_session(request, interact):
 
 
 def get_users_by_email_or_msisdn(email_or_msisdn):
-    active_users = UserModel._default_manager.filter(
-        Q(msisdn__iexact=email_or_msisdn) & Q(is_msisdn_verified=True)
-        | Q(email__iexact=email_or_msisdn) & Q(is_email_verified=True),
-        Q(is_active=True)
-    )
+    users = UserModel._default_manager \
+        .filter(Q(msisdn__iexact=email_or_msisdn) | Q(email__iexact=email_or_msisdn),
+                Q(is_active=True))
+
     return (
-        u for u in active_users
+        u for u in users
         if u.has_usable_password() and
         (
             _unicode_ci_compare(email_or_msisdn, getattr(u, 'msisdn'))

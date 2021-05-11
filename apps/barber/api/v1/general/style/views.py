@@ -5,9 +5,10 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from utils.generals import get_model
-from .serializers import ListStyleSerializer, RetrieveStyleSerializer
+from .serializers import ListStyleOfTheYearSerializer, ListStyleSerializer, RetrieveStyleSerializer
 
 StyleCategory = get_model('barber', 'StyleCategory')
+StyleOfTheYear = get_model('barber', 'StyleOfTheYear')
 
 
 class StyleApiView(viewsets.ViewSet):
@@ -46,3 +47,22 @@ class StyleApiView(viewsets.ViewSet):
         serializer = RetrieveStyleSerializer(instance, many=False,
                                              context=self._context)
         return Response({'result': serializer.data}, status=status_code.HTTP_200_OK)
+
+
+class StyleOfTheYearApiView(viewsets.ViewSet):
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self._context = {}
+
+    def dispatch(self, request, *args, **kwargs):
+        self._context.update({'request': request})
+        return super().dispatch(request, *args, **kwargs)
+
+    def _get_instances(self):
+        return StyleOfTheYear.objects.all()[:30]
+
+    def list(self, request, format='json'):
+        instances = self._get_instances()
+        serializer = ListStyleOfTheYearSerializer(instances, many=True,
+                                                  context=self._context)
+        return Response({'results': serializer.data}, status=status_code.HTTP_200_OK)

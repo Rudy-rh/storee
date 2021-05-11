@@ -15,7 +15,7 @@ class UserChangeFormExtend(UserChangeForm):
         # Make user email filled
         if email:
             # Validate each user has different email
-            if UserModel.objects.filter(email=email).exclude(id=self.instance.id).exists():
+            if UserModel.objects.filter(email=email, is_email_verified=True).exclude(id=self.instance.id).exists():
                 raise forms.ValidationError(
                     _("Email {email} already registered.".format(email=email)))
         return email
@@ -31,19 +31,7 @@ class UserCreationFormExtend(UserCreationForm):
         # Make user email filled
         if email:
             # Validate each user has different email
-            if UserModel.objects.filter(email=email).exclude(username=username).exists():
+            if UserModel.objects.filter(email=email, is_email_verified=True).exclude(username=username).exists():
                 raise forms.ValidationError(
                     _("Email {email} already registered.".format(email=email)))
         return email
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
-        if commit:
-            user.save()
-
-        if isinstance(self.changed_data, dict):
-            groups = self.changed_data.get('groups')
-            if groups:
-                setattr(user, 'groups_input', groups)
-        return user

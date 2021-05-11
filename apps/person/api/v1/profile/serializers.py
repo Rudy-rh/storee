@@ -1,3 +1,4 @@
+
 import os
 import base64
 
@@ -8,6 +9,7 @@ from django.core.files.base import ContentFile
 
 from rest_framework import serializers
 from utils.generals import get_model
+
 
 Profile = get_model('person', 'Profile')
 

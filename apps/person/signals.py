@@ -1,12 +1,7 @@
 from django.db import transaction, IntegrityError
-from django.db.models import Q, Case, When, Value
+from django.db.models import Q
 from django.contrib.auth.models import Group
-from django.core.exceptions import ObjectDoesNotExist
-
 from utils.generals import get_model
-
-# Celery task
-from apps.person.tasks import send_verifycode_email, send_verifycode_msisdn
 
 Profile = get_model('person', 'Profile')
 
@@ -19,17 +14,6 @@ def user_save_handler(sender, instance, created, **kwargs):
             try:
                 Profile.objects.create(user=instance)
             except IntegrityError:
-                pass
-
-        # Get groups if user created by admin
-        groups_input = getattr(instance, 'groups_input', None)
-        if groups_input is None:
-            # This action indicate user self registration
-            # Set default user groups
-            try:
-                group = Group.objects.get(is_default=True)
-                instance.groups.add(group)
-            except ObjectDoesNotExist:
                 pass
 
     if not created:
@@ -57,13 +41,13 @@ def verifycode_save_handler(sender, instance, created, **kwargs):
         # Send via email
         if instance.email:
             data.update({'email': getattr(instance, 'email', None)})
-            send_verifycode_email.delay(data)  # with celery
+            # send_verifycode_email.delay(data) # with celery
             # send_verifycode_email(data)  # without celery
 
         # Send via SMS
         if instance.msisdn:
             data.update({'msisdn': getattr(instance, 'msisdn', None)})
-            send_verifycode_msisdn.delay(data)  # with celery
+            # send_verifycode_msisdn.delay(data) # with celery
             # send_verifycode_msisdn(data)  # without celery
 
         # mark oldest VerifyCode as expired
