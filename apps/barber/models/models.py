@@ -86,3 +86,21 @@ if not is_model_registered('barber', 'Brochure'):
             db_table = 'barber_brochure'
 
     __all__.append('Brochure')
+
+
+# 10
+if not is_model_registered('barber', 'BookingAssigned'):
+    class BookingAssigned(AbstractBookingAssigned):
+        class Meta(AbstractBookingAssigned.Meta):
+            db_table = 'barber_booking_assigned'
+
+    __all__.append('BookingAssigned')
+
+
+# 11
+if not is_model_registered('barber', 'BookingRating'):
+    class BookingRating(AbstractBookingRating):
+        class Meta(AbstractBookingRating.Meta):
+            db_table = 'barber_booking_rating'
+
+    __all__.append('BookingRating')

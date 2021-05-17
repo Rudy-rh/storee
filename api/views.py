@@ -38,6 +38,8 @@ class RootApiView(APIView):
                                           format=format, current_app='barber'),
                     'brochures': reverse('barber_api:general:brochure-list', request=request,
                                          format=format, current_app='barber'),
+                    'branchs': reverse('barber_api:general:branch-list', request=request,
+                                       format=format, current_app='barber'),
                 }
             }
         })

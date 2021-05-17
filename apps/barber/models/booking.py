@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from .abstract import AbstractCommonField
 
@@ -16,10 +17,10 @@ class AbstractBooking(AbstractCommonField):
         OTHER = 'ot', _("Lainnya")
 
     class Status(models.TextChoices):
-        PENDING = 'pe', _("Pending")
-        ACCEPT = 'cr', _("Accept")
-        REJECT = 're', _("Reject")
-        DONE = 'dn', _("Done")
+        PENDING = 'pending', _("Pending")
+        ACCEPT = 'accept', _("Accept")
+        REJECT = 'reject', _("Reject")
+        DONE = 'done', _("Done")
 
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                  related_name='bookings', limit_choices_to={'groups__name': 'Customer'})
@@ -53,3 +54,59 @@ class AbstractBooking(AbstractCommonField):
         if branch:
             self.branch = branch
         return super().save(*args, **kwargs)
+
+
+class AbstractBookingAssigned(AbstractCommonField):
+    booking = models.OneToOneField('barber.Booking', on_delete=models.CASCADE,
+                                   related_name='assigned')
+    cashier = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                related_name='assigneds', limit_choices_to={'groups__name': 'Cashier'})
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+        verbose_name = _("Booking Assigned")
+        verbose_name_plural = _("Booking Assigneds")
+
+    def __str__(self):
+        return self.cashier.name
+
+
+class AbstractBookingRating(AbstractCommonField):
+    """ Each Booking only has one time rating """
+    class Star(models.IntegerChoices):
+        S1 = 1, _("1 Star")
+        S2 = 2, _("2 Stars")
+        S3 = 3, _("3 Stars")
+        S4 = 4, _("4 Stars")
+        S5 = 5, _("5 Stars")
+
+    booking = models.OneToOneField('barber.Booking', on_delete=models.CASCADE,
+                                   related_name='rating')
+    assigned = models.OneToOneField('barber.BookingAssigned', on_delete=models.CASCADE,
+                                    related_name='rating', editable=False)
+
+    rmanagement = models.IntegerField(choices=Star.choices,
+                                      validators=[MaxValueValidator(5), MinValueValidator(1)])
+    rhygiene = models.IntegerField(choices=Star.choices,
+                                   validators=[MaxValueValidator(5), MinValueValidator(1)])
+    rbarberman = models.IntegerField(choices=Star.choices,
+                                     validators=[MaxValueValidator(5), MinValueValidator(1)])
+    rcashier = models.IntegerField(choices=Star.choices,
+                                   validators=[MaxValueValidator(5), MinValueValidator(1)])
+    rsuggestion = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+        verbose_name = _("Booking Rating")
+        verbose_name_plural = _("Booking Ratings")
+
+    def __str__(self):
+        return self.booking.customer.username
+
+    def save(self, *args, **kwargs):
+        self.assigned = self.booking.assigned
+        super().save(*args, **kwargs)
