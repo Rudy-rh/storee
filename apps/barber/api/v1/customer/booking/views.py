@@ -51,7 +51,6 @@ class BookingApiView(viewsets.ViewSet):
 
     def dispatch(self, request, *args, **kwargs):
         self._context.update({'request': request})
-        self._user = request.user
         self._uuid = kwargs.get('uuid')
         return super().dispatch(request, *args, **kwargs)
 
@@ -77,6 +76,7 @@ class BookingApiView(viewsets.ViewSet):
         return Response(results, status=status_code.HTTP_200_OK)
 
     def retrieve(self, request, uuid=None, format=None):
+        self._user = request.user
         instance = self._get_instance()
         serializer = RetrieveBookingSerializer(instance, many=False,
                                                context=self._context)
