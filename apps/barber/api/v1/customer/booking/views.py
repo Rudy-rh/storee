@@ -84,6 +84,7 @@ class BookingApiView(viewsets.ViewSet):
 
     @transaction.atomic()
     def create(self, request, format='json'):
+        self._user = request.user
         serializer = CreateBookingSerializer(data=request.data, context=self._context,
                                              many=False)
         if serializer.is_valid(raise_exception=True):
@@ -114,6 +115,7 @@ class BookingApiView(viewsets.ViewSet):
                 "rsuggestion": "text"
             }
         """
+        self._user = request.user
         instance = self._get_instance()
         self._context.update({'booking': instance})
         serializer = CreateBookingRatingSerializer(data=request.data, context=self._context,
