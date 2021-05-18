@@ -11,7 +11,13 @@ from rest_framework.decorators import action
 
 from utils.generals import get_model
 from utils.pagination import build_result_pagination
-from .serializers import CreateBookingRatingSerializer, CreateBookingSerializer, ListBookingSerializer, RetrieveBookingRatingSerializer, RetrieveBookingSerializer
+from .serializers import (
+    CreateBookingRatingSerializer, 
+    CreateBookingSerializer, 
+    ListBookingSerializer, 
+    RetrieveBookingRatingSerializer, 
+    RetrieveBookingSerializer
+)
 
 Booking = get_model('barber', 'Booking')
 
@@ -62,6 +68,7 @@ class BookingApiView(viewsets.ViewSet):
             raise NotFound()
         
     def list(self, request, format='json'):
+        self._user = request.user
         instances = self._get_instances()
         paginator = _PAGINATOR.paginate_queryset(instances, request)
         serializer = ListBookingSerializer(paginator, context=self._context,
