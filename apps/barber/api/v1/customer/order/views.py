@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import viewsets, status as status_code
@@ -12,20 +13,20 @@ from rest_framework.decorators import action
 from utils.generals import get_model
 from utils.pagination import build_result_pagination
 from .serializers import (
-    CreateBookingRatingSerializer, 
-    CreateBookingSerializer, 
-    ListBookingSerializer, 
-    RetrieveBookingRatingSerializer, 
-    RetrieveBookingSerializer
+    CreateOrderRatingSerializer, 
+    CreateOrderSerializer, 
+    ListOrderSerializer, 
+    RetrieveOrderRatingSerializer, 
+    RetrieveOrderSerializer
 )
 
-Booking = get_model('barber', 'Booking')
+Order = get_model('barber', 'Order')
 
 # Define to avoid used ...().paginate__
 _PAGINATOR = LimitOffsetPagination()
 
 
-class BookingApiView(viewsets.ViewSet):
+class OrderApiView(viewsets.ViewSet):
     """
     POST;
     -------
@@ -36,7 +37,7 @@ class BookingApiView(viewsets.ViewSet):
             "reserved_type": "ms",
             "styleitem": "27a19a42-0b4f-4503-a34a-003194d41aec",
             "barberman": "db52f520-80db-4de8-8000-e9f1292d6cb7",
-            "note": "Booking saja..."
+            "note": "Order saja..."
         }
     """
 
@@ -55,10 +56,10 @@ class BookingApiView(viewsets.ViewSet):
         return super().dispatch(request, *args, **kwargs)
 
     def _get_instances(self):
-        return Booking.objects \
+        return Order.objects \
             .prefetch_related('customer', 'branch', 'barberman', 'rating') \
             .select_related('customer', 'branch', 'barberman', 'rating') \
-            .filter(customer=self._user.id)
+            .filter(Q(customer_id=self._user.id) | Q(assigned__cashier_id=self._user.id))
 
     def _get_instance(self):
         try:
@@ -70,7 +71,7 @@ class BookingApiView(viewsets.ViewSet):
         self._user = request.user
         instances = self._get_instances()
         paginator = _PAGINATOR.paginate_queryset(instances, request)
-        serializer = ListBookingSerializer(paginator, context=self._context,
+        serializer = ListOrderSerializer(paginator, context=self._context,
                                            many=True)
         results = build_result_pagination(self, _PAGINATOR, serializer)
         return Response(results, status=status_code.HTTP_200_OK)
@@ -78,14 +79,14 @@ class BookingApiView(viewsets.ViewSet):
     def retrieve(self, request, uuid=None, format=None):
         self._user = request.user
         instance = self._get_instance()
-        serializer = RetrieveBookingSerializer(instance, many=False,
+        serializer = RetrieveOrderSerializer(instance, many=False,
                                                context=self._context)
         return Response({'result': serializer.data}, status=status_code.HTTP_200_OK)
 
     @transaction.atomic()
     def create(self, request, format='json'):
         self._user = request.user
-        serializer = CreateBookingSerializer(data=request.data, context=self._context,
+        serializer = CreateOrderSerializer(data=request.data, context=self._context,
                                              many=False)
         if serializer.is_valid(raise_exception=True):
             try:
@@ -93,7 +94,7 @@ class BookingApiView(viewsets.ViewSet):
             except ValidationError as e:
                 raise ValidationError({'detail': str(e)})
 
-            _serializer = RetrieveBookingSerializer(serializer.instance, many=False,
+            _serializer = RetrieveOrderSerializer(serializer.instance, many=False,
                                                     context=self._context)
             return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
         return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)
@@ -117,8 +118,8 @@ class BookingApiView(viewsets.ViewSet):
         """
         self._user = request.user
         instance = self._get_instance()
-        self._context.update({'booking': instance})
-        serializer = CreateBookingRatingSerializer(data=request.data, context=self._context,
+        self._context.update({'order': instance})
+        serializer = CreateOrderRatingSerializer(data=request.data, context=self._context,
                                                    many=False)
         if serializer.is_valid(raise_exception=True):
             try:
@@ -126,7 +127,7 @@ class BookingApiView(viewsets.ViewSet):
             except ValidationError as e:
                 raise ValidationError({'detail': str(e)})
 
-            _serializer = RetrieveBookingRatingSerializer(serializer.instance, many=False,
+            _serializer = RetrieveOrderRatingSerializer(serializer.instance, many=False,
                                                           context=self._context)
             return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
         return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)

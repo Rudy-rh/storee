@@ -7,14 +7,14 @@ from rest_framework import serializers
 from utils.generals import get_model
 
 UserModel = get_user_model()
-Booking = get_model('barber', 'Booking')
-BookingRating = get_model('barber', 'BookingRating')
+Order = get_model('barber', 'Order')
+OrderRating = get_model('barber', 'OrderRating')
 StyleItem = get_model('barber', 'StyleItem')
 BranchBarberman = get_model('barber', 'BranchBarberman')
 
 
-class BaseBookingRatingSerializer(serializers.ModelSerializer):
-    booking = serializers.UUIDField(source='booking.uuid', read_only=True)
+class BaseOrderRatingSerializer(serializers.ModelSerializer):
+    order = serializers.UUIDField(source='order.uuid', read_only=True)
     rating_avg = serializers.SerializerMethodField()
 
     def get_rating_avg(self, instance):
@@ -27,21 +27,21 @@ class BaseBookingRatingSerializer(serializers.ModelSerializer):
         return x
 
 
-class CreateBookingRatingSerializer(BaseBookingRatingSerializer):
+class CreateOrderRatingSerializer(BaseOrderRatingSerializer):
     class Meta:
-        model = BookingRating
+        model = OrderRating
         fields = ('rmanagement', 'rhygiene', 'rbarberman', 'rcashier',
                   'rsuggestion', )
 
     def validate(self, data):
-        booking = self.context.get('booking', None)
-        if booking.status != Booking.Status.DONE:
+        order = self.context.get('order', None)
+        if order.status != Order.Status.DONE:
             raise serializers.ValidationError(detail=_("Belum boleh memberi rating sampai selesai dilayani"))
         return super().validate(data)
     
     @transaction.atomic()
     def create(self, validated_data):
-        booking = self.context.get('booking', None)
+        order = self.context.get('order', None)
         defaults = {
             'rmanagement': validated_data.pop('rmanagement'),
             'rhygiene': validated_data.pop('rhygiene'),
@@ -49,19 +49,19 @@ class CreateBookingRatingSerializer(BaseBookingRatingSerializer):
             'rcashier': validated_data.pop('rcashier'),
             'rsuggestion': validated_data.pop('rsuggestion')
         }
-        instance, _created = BookingRating.objects \
-            .update_or_create(booking=booking, defaults=defaults, **validated_data)
+        instance, _created = OrderRating.objects \
+            .update_or_create(order=order, defaults=defaults, **validated_data)
         return instance
 
 
-class RetrieveBookingRatingSerializer(BaseBookingRatingSerializer):
+class RetrieveOrderRatingSerializer(BaseOrderRatingSerializer):
     class Meta:
-        model = BookingRating
+        model = OrderRating
         fields = '__all__'
 
 
 
-class CreateBookingSerializer(serializers.ModelSerializer):
+class CreateOrderSerializer(serializers.ModelSerializer):
     customer = serializers.HiddenField(default=serializers.CurrentUserDefault())
     barberman = serializers.SlugRelatedField(slug_field='uuid', write_only=False,
                                              queryset=BranchBarberman.objects.all())
@@ -70,7 +70,7 @@ class CreateBookingSerializer(serializers.ModelSerializer):
                                              required=False)
 
     class Meta:
-        model = Booking
+        model = Order
         fields = ('customer', 'barberman', 'reserved_type',
                   'reserved_date', 'reserved_time', 'styleitem',
                   'note',)
@@ -84,14 +84,14 @@ class CreateBookingSerializer(serializers.ModelSerializer):
         }
 
 
-class BaseBookingSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='barber_api:customer:booking-detail',
+class BaseOrderSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='barber_api:customer:order-detail',
                                                lookup_field='uuid', read_only=True)
     reserved_type = serializers.SerializerMethodField()
     styleitem = serializers.SerializerMethodField()
     date = serializers.SerializerMethodField()
     status_display = serializers.SerializerMethodField()
-    rating = RetrieveBookingRatingSerializer(read_only=True)
+    rating = RetrieveOrderRatingSerializer(read_only=True)
 
     def get_reserved_type(self, instance):
         return instance.get_reserved_type_display()
@@ -108,15 +108,15 @@ class BaseBookingSerializer(serializers.ModelSerializer):
         return instance.get_status_display()
 
 
-class ListBookingSerializer(BaseBookingSerializer):
+class ListOrderSerializer(BaseOrderSerializer):
     class Meta:
-        model = Booking
+        model = Order
         fields = ('create_at', 'date', 'reserved_date', 'reserved_time', 'url',
                   'uuid', 'reserved_type', 'styleitem', 'status', 'status_display', 
                   'note', 'rating',)
 
 
-class RetrieveBookingSerializer(BaseBookingSerializer):
+class RetrieveOrderSerializer(BaseOrderSerializer):
     class Meta:
-        model = Booking
+        model = Order
         fields = '__all__'

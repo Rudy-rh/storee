@@ -26,8 +26,12 @@ class RootApiView(APIView):
             },
             'barber': {
                 'customer': {
-                    'bookings': reverse('barber_api:customer:booking-list', request=request,
+                    'orders': reverse('barber_api:customer:order-list', request=request,
                                         format=format, current_app='barber'),
+                },
+                'cashier': {
+                    'order-ratingss': reverse('barber_api:cashier:order_rating-list', request=request,
+                                                format=format, current_app='barber'),
                 },
                 'general': {
                     'styles': reverse('barber_api:general:style-list', request=request,
@@ -38,6 +42,8 @@ class RootApiView(APIView):
                                           format=format, current_app='barber'),
                     'brochures': reverse('barber_api:general:brochure-list', request=request,
                                          format=format, current_app='barber'),
+                    'rules': reverse('barber_api:general:rules-list', request=request,
+                                     format=format, current_app='barber'),
                     'branchs': reverse('barber_api:general:branch-list', request=request,
                                        format=format, current_app='barber'),
                 }

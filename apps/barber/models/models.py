@@ -1,5 +1,5 @@
 from .general import *
-from .booking import *
+from .order import *
 from .branch import *
 
 from utils.generals import is_model_registered
@@ -44,12 +44,12 @@ if not is_model_registered('barber', 'StyleOfTheYear'):
 
 
 # 5
-if not is_model_registered('barber', 'Booking'):
-    class Booking(AbstractBooking):
-        class Meta(AbstractBooking.Meta):
-            db_table = 'barber_booking'
+if not is_model_registered('barber', 'Order'):
+    class Order(AbstractOrder):
+        class Meta(AbstractOrder.Meta):
+            db_table = 'barber_order'
 
-    __all__.append('Booking')
+    __all__.append('Order')
 
 
 # 6
@@ -89,18 +89,27 @@ if not is_model_registered('barber', 'Brochure'):
 
 
 # 10
-if not is_model_registered('barber', 'BookingAssigned'):
-    class BookingAssigned(AbstractBookingAssigned):
-        class Meta(AbstractBookingAssigned.Meta):
-            db_table = 'barber_booking_assigned'
+if not is_model_registered('barber', 'OrderAssigned'):
+    class OrderAssigned(AbstractOrderAssigned):
+        class Meta(AbstractOrderAssigned.Meta):
+            db_table = 'barber_order_assigned'
 
-    __all__.append('BookingAssigned')
+    __all__.append('OrderAssigned')
 
 
 # 11
-if not is_model_registered('barber', 'BookingRating'):
-    class BookingRating(AbstractBookingRating):
-        class Meta(AbstractBookingRating.Meta):
-            db_table = 'barber_booking_rating'
+if not is_model_registered('barber', 'OrderRating'):
+    class OrderRating(AbstractOrderRating):
+        class Meta(AbstractOrderRating.Meta):
+            db_table = 'barber_order_rating'
 
-    __all__.append('BookingRating')
+    __all__.append('OrderRating')
+
+
+# 12
+if not is_model_registered('barber', 'Rules'):
+    class Rules(AbstractRules):
+        class Meta(AbstractRules.Meta):
+            db_table = 'barber_rules'
+
+    __all__.append('Rules')

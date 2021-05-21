@@ -6,13 +6,14 @@ StyleCategory = get_model('barber', 'StyleCategory')
 StyleItem = get_model('barber', 'StyleItem')
 StyleAttachment = get_model('barber', 'StyleAttachment')
 StyleOfTheYear = get_model('barber', 'StyleOfTheYear')
-Booking = get_model('barber', 'Booking')
-BookingAssigned = get_model('barber', 'BookingAssigned')
-BookingRating = get_model('barber', 'BookingRating')
+Order = get_model('barber', 'Order')
+OrderAssigned = get_model('barber', 'OrderAssigned')
+OrderRating = get_model('barber', 'OrderRating')
 Branch = get_model('barber', 'Branch')
 BranchBarberman = get_model('barber', 'BranchBarberman')
 BranchCashier = get_model('barber', 'BranchCashier')
 Brochure = get_model('barber', 'Brochure')
+Rules = get_model('barber', 'Rules')
 
 
 class StyleAttachmentInline(admin.StackedInline):
@@ -27,12 +28,12 @@ class BranchCashierInline(admin.StackedInline):
     model = BranchCashier
 
 
-class BookingAssignedInline(admin.StackedInline):
-    model = BookingAssigned
+class OrderAssignedInline(admin.StackedInline):
+    model = OrderAssigned
 
 
-class BookingRatingInline(admin.StackedInline):
-    model = BookingRating
+class OrderRatingInline(admin.StackedInline):
+    model = OrderRating
 
 
 class StyleItemExtend(admin.ModelAdmin):
@@ -40,9 +41,9 @@ class StyleItemExtend(admin.ModelAdmin):
     inlines = [StyleAttachmentInline, ]
 
 
-class BookingExtend(admin.ModelAdmin):
-    model = Booking
-    inlines = [BookingAssignedInline, BookingRatingInline, ]
+class OrderExtend(admin.ModelAdmin):
+    model = Order
+    inlines = [OrderAssignedInline, OrderRatingInline, ]
 
 
 class BranchExtend(admin.ModelAdmin):
@@ -53,6 +54,7 @@ class BranchExtend(admin.ModelAdmin):
 admin.site.register(StyleCategory)
 admin.site.register(StyleItem, StyleItemExtend)
 admin.site.register(StyleOfTheYear)
-admin.site.register(Booking, BookingExtend)
+admin.site.register(Order, OrderExtend)
 admin.site.register(Branch, BranchExtend)
 admin.site.register(Brochure)
+admin.site.register(Rules)

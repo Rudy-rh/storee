@@ -6,7 +6,15 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from .abstract import AbstractCommonField
 
 
-class AbstractBooking(AbstractCommonField):
+def censort(t):
+    appear = t[-3:]
+    size = len(t)
+    censored = t[:size - 3]
+    word = '*' * len(censored)
+    return word + appear
+
+
+class AbstractOrder(AbstractCommonField):
     class Types(models.TextChoices):
         HAIRCUT = 'hc', _("Hair Cut")
         HAIRSPA = 'hs', _("Hair Spa")
@@ -23,13 +31,13 @@ class AbstractBooking(AbstractCommonField):
         DONE = 'done', _("Done")
 
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                                 related_name='bookings', limit_choices_to={'groups__name': 'Customer'})
+                                 related_name='orders', limit_choices_to={'groups__name': 'Customer'})
     styleitem = models.ForeignKey('barber.StyleItem', on_delete=models.CASCADE,
-                                  related_name='bookings', null=True, blank=True)
-    barberman = models.ForeignKey('barber.BranchBarberman', on_delete=models.SET_NULL,
+                                  related_name='orders', null=True, blank=True)
+    barberman = models.ForeignKey('barber.BranchBarberman', on_delete=models.SET_NULL, blank=True,
                                   null=True, limit_choices_to={'user__groups__name': 'Barberman'})
     branch = models.ForeignKey('barber.Branch', on_delete=models.CASCADE,
-                               related_name='bookings', editable=False)
+                               related_name='orders', editable=False)
 
     reserved_type = models.CharField(choices=Types.choices, max_length=5)
     reserved_date = models.DateField(auto_now=False)
@@ -37,13 +45,14 @@ class AbstractBooking(AbstractCommonField):
     note = models.TextField(null=True, blank=True)
     status = models.CharField(choices=Status.choices, default=Status.PENDING,
                               max_length=15)
+    is_booking = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
         app_label = 'barber'
         ordering = ['-create_at']
-        verbose_name = _("Booking")
-        verbose_name_plural = _("Bookings")
+        verbose_name = _("Order")
+        verbose_name_plural = _("Orders")
 
     def __str__(self):
         return self.customer.name
@@ -56,8 +65,8 @@ class AbstractBooking(AbstractCommonField):
         return super().save(*args, **kwargs)
 
 
-class AbstractBookingAssigned(AbstractCommonField):
-    booking = models.OneToOneField('barber.Booking', on_delete=models.CASCADE,
+class AbstractOrderAssigned(AbstractCommonField):
+    order = models.OneToOneField('barber.Order', on_delete=models.CASCADE,
                                    related_name='assigned')
     cashier = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                 related_name='assigneds', limit_choices_to={'groups__name': 'Cashier'})
@@ -66,15 +75,15 @@ class AbstractBookingAssigned(AbstractCommonField):
         abstract = True
         app_label = 'barber'
         ordering = ['-create_at']
-        verbose_name = _("Booking Assigned")
-        verbose_name_plural = _("Booking Assigneds")
+        verbose_name = _("Order Assigned")
+        verbose_name_plural = _("Order Assigneds")
 
     def __str__(self):
         return self.cashier.name
 
 
-class AbstractBookingRating(AbstractCommonField):
-    """ Each Booking only has one time rating """
+class AbstractOrderRating(AbstractCommonField):
+    """ Each Order only has one time rating """
     class Star(models.IntegerChoices):
         S1 = 1, _("1 Star")
         S2 = 2, _("2 Stars")
@@ -82,9 +91,9 @@ class AbstractBookingRating(AbstractCommonField):
         S4 = 4, _("4 Stars")
         S5 = 5, _("5 Stars")
 
-    booking = models.OneToOneField('barber.Booking', on_delete=models.CASCADE,
+    order = models.OneToOneField('barber.Order', on_delete=models.CASCADE,
                                    related_name='rating')
-    assigned = models.OneToOneField('barber.BookingAssigned', on_delete=models.CASCADE,
+    assigned = models.OneToOneField('barber.OrderAssigned', on_delete=models.CASCADE,
                                     related_name='rating', editable=False)
 
     rmanagement = models.IntegerField(choices=Star.choices,
@@ -101,12 +110,18 @@ class AbstractBookingRating(AbstractCommonField):
         abstract = True
         app_label = 'barber'
         ordering = ['-create_at']
-        verbose_name = _("Booking Rating")
-        verbose_name_plural = _("Booking Ratings")
+        verbose_name = _("Order Rating")
+        verbose_name_plural = _("Order Ratings")
 
     def __str__(self):
-        return self.booking.customer.username
+        return self.order.customer.username
+
+    @property
+    def customer(self):
+        t = self.order.customer.username
+        c = censort(t)
+        return c
 
     def save(self, *args, **kwargs):
-        self.assigned = self.booking.assigned
+        self.assigned = self.order.assigned
         super().save(*args, **kwargs)

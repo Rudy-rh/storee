@@ -7,6 +7,7 @@ from rest_framework.routers import DefaultRouter
 from .barberman.views import BarbermanApiView
 from .style.views import StyleApiView, StyleOfTheYearApiView
 from .brochure.views import BrochureApiView
+from .rules.views import RulesApiView
 from .branch.views import BranchApiView
 
 # Create a router and register our viewsets with it.
@@ -15,6 +16,7 @@ router.register('barbermans', BarbermanApiView, basename='barberman')
 router.register('styles', StyleApiView, basename='style')
 router.register('styles-oty', StyleOfTheYearApiView, basename='style_oty')
 router.register('brochures', BrochureApiView, basename='brochure')
+router.register('rules', RulesApiView, basename='rules')
 router.register('branchs', BranchApiView, basename='branch')
 
 # The API URLs are now determined automatically by the router.

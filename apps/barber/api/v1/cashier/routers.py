@@ -4,11 +4,11 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 # LOCAL
-from .order.views import OrderApiView
+from .rating.views import OrderRatingApiView
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter(trailing_slash=True)
-router.register('orders', OrderApiView, basename='order')
+router.register('order-ratings', OrderRatingApiView, basename='order_rating')
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
