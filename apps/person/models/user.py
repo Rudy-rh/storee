@@ -135,7 +135,7 @@ class AbstractProfile(models.Model):
     @transaction.atomic()
     def generate_qrcode(self):
         if not self.qrcode:
-            qr_data = self.user.uuid
+            qr_data = self.user.username
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.constants.ERROR_CORRECT_L,
