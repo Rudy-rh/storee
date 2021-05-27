@@ -49,6 +49,7 @@ CSRF_COOKIE_SECURE = False
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 CSRF_TRUSTED_ORIGINS = [
+    'localhost',
     'localhost:8100',
     'localhost:8101',
     '10.0.2.2:8101',
@@ -61,6 +62,7 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
+    'http://localhost',
     'http://localhost:8100',
     'http://localhost:8101',
     'http://10.0.2.2:8101',

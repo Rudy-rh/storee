@@ -1,7 +1,9 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Q
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import viewsets, status as status_code
 from rest_framework.response import Response
@@ -9,7 +11,7 @@ from rest_framework.exceptions import NotAcceptable, NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
-from rest_framework.parsers import FileUploadParser, JSONParser, MultiPartParser
+from rest_framework.parsers import JSONParser, MultiPartParser
 
 from utils.generals import get_model
 from utils.pagination import build_result_pagination
@@ -31,6 +33,7 @@ OrderAttachment = get_model('barber', 'OrderAttachment')
 _PAGINATOR = LimitOffsetPagination()
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class OrderApiView(viewsets.ViewSet):
     """
     POST;
@@ -167,7 +170,7 @@ class OrderApiView(viewsets.ViewSet):
 
     @transaction.atomic()
     @action(detail=True, methods=['post'], url_name='attachment', url_path='attachments',
-            parser_classes=[JSONParser, MultiPartParser])
+            parser_classes=[MultiPartParser])
     def attachment(self, request, uuid=None, format=None):
         """
         Format;
