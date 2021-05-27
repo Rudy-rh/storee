@@ -17,7 +17,7 @@ from .serializers import CreateVerifyCodeSerializer, RetrieveVerifyCodeSerialzer
 VerifyCode = get_model('person', 'VerifyCode')
 
 
-@method_decorator([ensure_csrf_cookie, csrf_protect_drf], name='dispatch')
+# @method_decorator([ensure_csrf_cookie, csrf_protect_drf], name='dispatch')
 class VerifyCodeApiView(viewsets.ViewSet):
     """
     POST
