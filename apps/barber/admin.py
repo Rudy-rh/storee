@@ -9,6 +9,7 @@ StyleOfTheYear = get_model('barber', 'StyleOfTheYear')
 Order = get_model('barber', 'Order')
 OrderAssigned = get_model('barber', 'OrderAssigned')
 OrderRating = get_model('barber', 'OrderRating')
+OrderAttachment = get_model('barber', 'OrderAttachment')
 Branch = get_model('barber', 'Branch')
 BranchBarberman = get_model('barber', 'BranchBarberman')
 BranchCashier = get_model('barber', 'BranchCashier')
@@ -36,6 +37,10 @@ class OrderRatingInline(admin.StackedInline):
     model = OrderRating
 
 
+class OrderAttachmentInline(admin.StackedInline):
+    model = OrderAttachment
+
+
 class StyleItemExtend(admin.ModelAdmin):
     model = StyleItem
     inlines = [StyleAttachmentInline, ]
@@ -43,7 +48,7 @@ class StyleItemExtend(admin.ModelAdmin):
 
 class OrderExtend(admin.ModelAdmin):
     model = Order
-    inlines = [OrderAssignedInline, OrderRatingInline, ]
+    inlines = [OrderAssignedInline, OrderRatingInline, OrderAttachmentInline, ]
 
 
 class BranchExtend(admin.ModelAdmin):

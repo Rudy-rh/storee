@@ -5,22 +5,27 @@ from django.utils.translation import gettext_lazy as _
 
 from rest_framework import viewsets, status as status_code
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotAcceptable, NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
+from rest_framework.parsers import FileUploadParser, JSONParser, MultiPartParser
 
 from utils.generals import get_model
 from utils.pagination import build_result_pagination
 from .serializers import (
-    CreateOrderRatingSerializer, 
-    CreateOrderSerializer, 
-    ListOrderSerializer, 
-    RetrieveOrderRatingSerializer, 
+    CreateOrderByTakePhotoSerializer,
+    CreateOrderRatingSerializer,
+    CreateOrderSerializer,
+    HistoryOrderSerializer,
+    ListOrderSerializer,
+    OrderAttachmentSerializer,
+    RetrieveOrderRatingSerializer,
     RetrieveOrderSerializer
 )
 
 Order = get_model('barber', 'Order')
+OrderAttachment = get_model('barber', 'OrderAttachment')
 
 # Define to avoid used ...().paginate__
 _PAGINATOR = LimitOffsetPagination()
@@ -66,13 +71,13 @@ class OrderApiView(viewsets.ViewSet):
             return self._get_instances().get(uuid=self._uuid)
         except ObjectDoesNotExist:
             raise NotFound()
-        
+
     def list(self, request, format='json'):
         self._user = request.user
         instances = self._get_instances()
         paginator = _PAGINATOR.paginate_queryset(instances, request)
         serializer = ListOrderSerializer(paginator, context=self._context,
-                                           many=True)
+                                         many=True)
         results = build_result_pagination(self, _PAGINATOR, serializer)
         return Response(results, status=status_code.HTTP_200_OK)
 
@@ -80,14 +85,14 @@ class OrderApiView(viewsets.ViewSet):
         self._user = request.user
         instance = self._get_instance()
         serializer = RetrieveOrderSerializer(instance, many=False,
-                                               context=self._context)
+                                             context=self._context)
         return Response({'result': serializer.data}, status=status_code.HTTP_200_OK)
 
     @transaction.atomic()
     def create(self, request, format='json'):
         self._user = request.user
         serializer = CreateOrderSerializer(data=request.data, context=self._context,
-                                             many=False)
+                                           many=False)
         if serializer.is_valid(raise_exception=True):
             try:
                 serializer.save()
@@ -95,7 +100,7 @@ class OrderApiView(viewsets.ViewSet):
                 raise ValidationError({'detail': str(e)})
 
             _serializer = RetrieveOrderSerializer(serializer.instance, many=False,
-                                                    context=self._context)
+                                                  context=self._context)
             return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
         return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)
 
@@ -120,7 +125,7 @@ class OrderApiView(viewsets.ViewSet):
         instance = self._get_instance()
         self._context.update({'order': instance})
         serializer = CreateOrderRatingSerializer(data=request.data, context=self._context,
-                                                   many=False)
+                                                 many=False)
         if serializer.is_valid(raise_exception=True):
             try:
                 serializer.save()
@@ -128,6 +133,76 @@ class OrderApiView(viewsets.ViewSet):
                 raise ValidationError({'detail': str(e)})
 
             _serializer = RetrieveOrderRatingSerializer(serializer.instance, many=False,
-                                                          context=self._context)
+                                                        context=self._context)
             return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
         return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)
+
+    # create order by cashier
+    @transaction.atomic()
+    @action(detail=False, methods=['post'], url_name='take_order', url_path='take-order')
+    def take_order(self, request, format='json'):
+        """
+        POST;
+        -------
+            Format;
+            {
+                "styleitem": "27a19a42-0b4f-4503-a34a-003194d41aec",
+                "barberman": "username",
+                "customer": "username"
+            }
+        """
+
+        serializer = CreateOrderByTakePhotoSerializer(data=request.data, context=self._context,
+                                                      many=False)
+        if serializer.is_valid(raise_exception=True):
+            try:
+                serializer.save()
+            except ValidationError as e:
+                raise ValidationError({'detail': str(e)})
+
+            _serializer = RetrieveOrderSerializer(serializer.instance, many=False,
+                                                  context=self._context)
+            return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)
+
+    @transaction.atomic()
+    @action(detail=True, methods=['post'], url_name='attachment', url_path='attachments',
+            parser_classes=[JSONParser, MultiPartParser])
+    def attachment(self, request, uuid=None, format=None):
+        """
+        Format;
+
+            {
+                "file": "file object"
+            }
+        """
+        self._user = request.user
+        order = self._get_instance()
+        self._context.update({'order': order})
+        serializer = OrderAttachmentSerializer(data=request.data, many=False,
+                                               context=self._context)
+        if serializer.is_valid(raise_exception=True):
+            try:
+                serializer.save()
+            except ValidationError as e:
+                raise ValidationError({'detail': str(e)})
+
+            _serializer = RetrieveOrderSerializer(serializer.instance.order, many=False,
+                                                  context=self._context)
+            return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)
+
+    @action(detail=False, methods=['get'], url_name='history', url_path='histories')
+    def history(self, request, format=None):
+        year = request.query_params.get('year', None)
+        if not year:
+            raise NotAcceptable(detail=_("Year not defined"))
+
+        attachments = Order.objects \
+            .prefetch_related('customer', 'attachments') \
+            .select_related('customer') \
+            .filter(reserved_date__year=year, customer_id=request.user.id)
+
+        serializer = HistoryOrderSerializer(
+            attachments, many=True, context=self._context)
+        return Response(serializer.data, status=status_code.HTTP_200_OK)

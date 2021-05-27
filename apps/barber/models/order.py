@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -67,7 +69,7 @@ class AbstractOrder(AbstractCommonField):
 
 class AbstractOrderAssigned(AbstractCommonField):
     order = models.OneToOneField('barber.Order', on_delete=models.CASCADE,
-                                   related_name='assigned')
+                                 related_name='assigned')
     cashier = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                 related_name='assigneds', limit_choices_to={'groups__name': 'Cashier'})
 
@@ -92,7 +94,7 @@ class AbstractOrderRating(AbstractCommonField):
         S5 = 5, _("5 Stars")
 
     order = models.OneToOneField('barber.Order', on_delete=models.CASCADE,
-                                   related_name='rating')
+                                 related_name='rating')
     assigned = models.OneToOneField('barber.OrderAssigned', on_delete=models.CASCADE,
                                     related_name='rating', editable=False)
 
@@ -124,4 +126,40 @@ class AbstractOrderRating(AbstractCommonField):
 
     def save(self, *args, **kwargs):
         self.assigned = self.order.assigned
+        super().save(*args, **kwargs)
+
+
+class AbstractOrderAttachment(AbstractCommonField):
+    class Angle(models.TextChoices):
+        FRONT = 'front', _("Depan")
+        SIDE = 'side', _("Samping")
+        BACK = 'back', _("Belakang")
+
+    order = models.ForeignKey('barber.Order', on_delete=models.CASCADE,
+                              related_name='attachments')
+
+    file = models.FileField(upload_to='order/%Y/%m/%d')
+    filename = models.CharField(max_length=255, editable=False)
+    filepath = models.CharField(max_length=255, editable=False)
+    filesize = models.IntegerField(editable=False)
+    filemime = models.CharField(max_length=255, editable=False)
+
+    label = models.CharField(max_length=255, null=True, blank=True)
+    caption = models.TextField(null=True, blank=True)
+    angle = models.TextField(choices=Angle.choices, max_length=15)
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+        verbose_name = _("Order Attachment")
+        verbose_name_plural = _("Order Attachments")
+
+    def __str__(self) -> str:
+        return self.label
+
+    def save(self, *args, **kwargs):
+        if not self.label:
+            base = os.path.basename(self.file.name)
+            self.label = base
         super().save(*args, **kwargs)

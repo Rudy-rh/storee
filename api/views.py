@@ -27,11 +27,11 @@ class RootApiView(APIView):
             'barber': {
                 'customer': {
                     'orders': reverse('barber_api:customer:order-list', request=request,
-                                        format=format, current_app='barber'),
+                                      format=format, current_app='barber'),
                 },
                 'cashier': {
                     'order-ratingss': reverse('barber_api:cashier:order_rating-list', request=request,
-                                                format=format, current_app='barber'),
+                                              format=format, current_app='barber'),
                 },
                 'general': {
                     'styles': reverse('barber_api:general:style-list', request=request,

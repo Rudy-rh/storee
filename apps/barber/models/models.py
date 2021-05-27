@@ -107,6 +107,15 @@ if not is_model_registered('barber', 'OrderRating'):
 
 
 # 12
+if not is_model_registered('barber', 'OrderAttachment'):
+    class OrderAttachment(AbstractOrderAttachment):
+        class Meta(AbstractOrderAttachment.Meta):
+            db_table = 'barber_order_attachment'
+
+    __all__.append('OrderAttachment')
+
+
+# 13
 if not is_model_registered('barber', 'Rules'):
     class Rules(AbstractRules):
         class Meta(AbstractRules.Meta):
