@@ -34,7 +34,7 @@ sentry_sdk.init(
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = False
 
-SECURE_REFERRER_POLICY = 'same-origin'
+SECURE_REFERRER_POLICY = 'no-referrer'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_SSL_REDIRECT = True
@@ -53,6 +53,7 @@ CSRF_COOKIE_SECURE = True
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 CSRF_TRUSTED_ORIGINS = [
+    'localhost',
     'storee-46b6e.web.app',
     '.storeebarbershop.com'
 ]
