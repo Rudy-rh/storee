@@ -33,7 +33,6 @@ OrderAttachment = get_model('barber', 'OrderAttachment')
 _PAGINATOR = LimitOffsetPagination()
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class OrderApiView(viewsets.ViewSet):
     """
     POST;
