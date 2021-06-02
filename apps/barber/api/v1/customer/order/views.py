@@ -169,7 +169,7 @@ class OrderApiView(viewsets.ViewSet):
 
     @transaction.atomic()
     @action(detail=True, methods=['post'], url_name='attachment', url_path='attachments',
-            permission_classes=[IsAuthenticated], parser_classes=[FileUploadParser])
+            parser_classes=[MultiPartParser])
     def attachment(self, request, uuid=None, format=None):
         """
         Format;
