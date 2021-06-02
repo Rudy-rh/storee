@@ -53,7 +53,7 @@ class RootApiView(APIView):
 
 @api_view(['GET'])
 @permission_classes((AllowAny, ))
-# @ensure_csrf_cookie
+@ensure_csrf_cookie
 def ping(request):
     csrftoken = request.COOKIES.get('csrftoken')
     if not csrftoken:
