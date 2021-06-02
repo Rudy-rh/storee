@@ -34,7 +34,7 @@ sentry_sdk.init(
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = False
 
-SECURE_REFERRER_POLICY = 'no-referrer'
+SECURE_REFERRER_POLICY = 'same-origin'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_SSL_REDIRECT = True
@@ -49,12 +49,10 @@ X_FRAME_OPTIONS = 'DENY'
 # https://docs.djangoproject.com/en/2.2/ref/csrf/
 CSRF_COOKIE_DOMAIN = '.storeebarbershop.com'
 CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
-CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = True
-CSRF_USE_SESSIONS = True
+CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 CSRF_TRUSTED_ORIGINS = [
-    'localhost',
     'storee-46b6e.web.app',
     '.storeebarbershop.com'
 ]
