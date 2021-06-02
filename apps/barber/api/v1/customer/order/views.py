@@ -11,7 +11,7 @@ from rest_framework.exceptions import NotAcceptable, NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
-from rest_framework.parsers import JSONParser, MultiPartParser
+from rest_framework.parsers import JSONParser, MultiPartParser, FileUploadParser
 
 from utils.generals import get_model
 from utils.pagination import build_result_pagination
@@ -169,7 +169,7 @@ class OrderApiView(viewsets.ViewSet):
 
     @transaction.atomic()
     @action(detail=True, methods=['post'], url_name='attachment', url_path='attachments',
-            permission_classes=[IsAuthenticated], parser_classes=[MultiPartParser])
+            permission_classes=[IsAuthenticated], parser_classes=[FileUploadParser])
     def attachment(self, request, uuid=None, format=None):
         """
         Format;
