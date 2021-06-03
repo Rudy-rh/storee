@@ -1,6 +1,8 @@
 import os
 
 from django.db import models
+from django.contrib.auth.models import Group
+
 from .abstract import AbstractCommonField
 
 
@@ -106,3 +108,36 @@ class AbstractRules(AbstractCommonField):
             base = os.path.basename(self.image.name)
             self.label = base
         super().save(*args, **kwargs)
+
+
+class AbstractWorkStandardCategory(AbstractCommonField):
+    groups = models.ForeignKey(Group, on_delete=models.CASCADE,
+                               related_name='standard_categories')
+    label = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+
+    def __str__(self) -> str:
+        return '[{}] {}'.format(self.groups.name, self.label)
+
+
+class AbstractWorkStandardSection(AbstractCommonField):
+    category = models.ForeignKey('barber.WorkStandardCategory',
+                                 on_delete=models.CASCADE,
+                                 related_name='standard_sections')
+
+    label = models.CharField(max_length=255)
+    video_url = models.URLField(max_length=255, null=True, blank=True)
+    video_file = models.FileField(max_length=500, upload_to='video',
+                                  null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+
+    def __str__(self) -> str:
+        return self.label

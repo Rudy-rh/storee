@@ -15,6 +15,8 @@ BranchBarberman = get_model('barber', 'BranchBarberman')
 BranchCashier = get_model('barber', 'BranchCashier')
 Brochure = get_model('barber', 'Brochure')
 Rules = get_model('barber', 'Rules')
+WorkStandardCategory = get_model('barber', 'WorkStandardCategory')
+WorkStandardSection = get_model('barber', 'WorkStandardSection')
 
 
 class StyleAttachmentInline(admin.StackedInline):
@@ -63,3 +65,5 @@ admin.site.register(Order, OrderExtend)
 admin.site.register(Branch, BranchExtend)
 admin.site.register(Brochure)
 admin.site.register(Rules)
+admin.site.register(WorkStandardCategory)
+admin.site.register(WorkStandardSection)

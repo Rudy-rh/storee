@@ -122,3 +122,21 @@ if not is_model_registered('barber', 'Rules'):
             db_table = 'barber_rules'
 
     __all__.append('Rules')
+
+
+# 14
+if not is_model_registered('barber', 'WorkStandardCategory'):
+    class WorkStandardCategory(AbstractWorkStandardCategory):
+        class Meta(AbstractWorkStandardCategory.Meta):
+            db_table = 'barber_work_standard_category'
+
+    __all__.append('WorkStandardCategory')
+
+
+# 15
+if not is_model_registered('barber', 'WorkStandardSection'):
+    class WorkStandardSection(AbstractWorkStandardSection):
+        class Meta(AbstractWorkStandardSection.Meta):
+            db_table = 'barber_work_standard_section'
+
+    __all__.append('WorkStandardSection')
