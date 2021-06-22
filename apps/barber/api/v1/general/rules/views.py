@@ -18,10 +18,9 @@ class RulesApiView(viewsets.ViewSet):
     def list(self, request):
         context = {'request': request}
 
-        try:
-            instance = Rules.objects.get(is_active=True)
-        except ObjectDoesNotExist:
-            raise NotFound()
+        instances = Rules.objects \
+            .filter(is_active=True) \
+            .order_by('-position')
 
-        serializer = RulesSerializer(instance, context=context, many=False)
+        serializer = RulesSerializer(instances, context=context, many=False)
         return Response(serializer.data, status=response_status.HTTP_200_OK)
