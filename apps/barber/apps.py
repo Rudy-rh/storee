@@ -12,5 +12,5 @@ class BarberConfig(AppConfig):
 
         from .signals import brochure_save_handler
 
-        post_save.connect(brochure_save_handler, sender=Brochure,
-                          dispatch_uid='brochure_signal')
+        # post_save.connect(brochure_save_handler, sender=Brochure,
+        #                   dispatch_uid='brochure_signal')

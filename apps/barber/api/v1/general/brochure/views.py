@@ -17,11 +17,9 @@ class BrochureApiView(viewsets.ViewSet):
 
     def list(self, request):
         context = {'request': request}
+        instances = Brochure.objects \
+            .filter(is_active=True) \
+            .order_by('-position')
 
-        try:
-            instance = Brochure.objects.get(is_active=True)
-        except ObjectDoesNotExist:
-            raise NotFound()
-
-        serializer = BrochureSerializer(instance, context=context, many=False)
+        serializer = BrochureSerializer(instances, context=context, many=True)
         return Response(serializer.data, status=response_status.HTTP_200_OK)

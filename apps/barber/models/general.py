@@ -73,6 +73,7 @@ class AbstractStyleOfTheYear(AbstractCommonField):
 class AbstractBrochure(AbstractCommonField):
     label = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(upload_to='brochure')
+    position = models.IntegerField(default=1)
     is_active = models.BooleanField(default=False)
 
     class Meta:
