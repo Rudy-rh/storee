@@ -32,18 +32,6 @@ class LoginBackend(ModelBackend):
     """Login w/h username or email"""
 
     def authenticate(self, request, username=None, password=None, **kwargs):
-        groups = []
-        if hasattr(request, 'data'):
-            groups = request.data.get('groups', [])
-
-        if len(groups) == 0:
-            # Use default groups
-            try:
-                groups = Group.objects.filter(is_default=True) \
-                    .values_list('name', flat=True)
-            except ObjectDoesNotExist:
-                pass
-
         if username is None:
             username = kwargs.get(UserModel.USERNAME_FIELD)
 
@@ -69,11 +57,6 @@ class LoginBackend(ModelBackend):
                 raise ValueError(message)
             except UserModel.DoesNotExist:
                 return None
-
-            if not user.is_staff or not user.is_superuser:
-                # check user groups
-                if not user.groups.filter(name__in=groups).exists():
-                    raise ValueError(_("Fail user doesn't have Groups"))
 
             if user and user.check_password(password) and self.user_can_authenticate(user):
                 return user
@@ -140,12 +123,12 @@ def get_users_by(field='email', value=None):
     )
 
 
-def clear_verifycode_session(request, interact):
-    # clear verifycode session
+def clear_securecode_session(request, interact):
+    # clear securecode session
     session_key = ['uuid', 'token', 'challenge', 'msisdn', 'email']
     for key in session_key:
         try:
-            del request.session['verifycode_%s_%s' % (interact, key)]
+            del request.session['securecode_%s_%s' % (interact, key)]
         except KeyError:
             pass
 

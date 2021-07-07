@@ -22,5 +22,5 @@ class RulesApiView(viewsets.ViewSet):
             .filter(is_active=True) \
             .order_by('-position')
 
-        serializer = RulesSerializer(instances, context=context, many=False)
+        serializer = RulesSerializer(instances, context=context, many=True)
         return Response(serializer.data, status=response_status.HTTP_200_OK)

@@ -1,4 +1,5 @@
 import uuid
+from django.db.models.expressions import Exists, OuterRef, Subquery
 import qrcode
 import time
 import calendar
@@ -8,6 +9,7 @@ from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils.text import slugify
 
 from utils.validators import non_python_keyword, identifier_validator
 
@@ -71,6 +73,27 @@ class User(AbstractUser):
     @property
     def is_cashier(self):
         return self.groups.filter(name__in=["Cashier"]).exists()
+
+    @property
+    def roles_by_group(self):
+        group_annotate = self.groups.filter(name=OuterRef('name'))
+        all_groups = self.groups.model.objects.all()
+        user_groups = self.groups.all()
+
+        # generate slug for group
+        # ie is_group_name
+        groups_role = {
+            'is_{}'.format(slugify(v.name)): Exists(Subquery(group_annotate.values('name')[:1]))
+            for i, v in enumerate(user_groups)
+        }
+
+        groups = all_groups.annotate(**groups_role)
+        ret = dict()
+
+        for group in groups:
+            slug = 'is_%s' % slugify(group.name)
+            ret.update({slug: getattr(group, slug, False)})
+        return ret
 
     def mark_email_verified(self):
         self.is_email_verified = True

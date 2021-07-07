@@ -1,9 +1,8 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Q
-from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 
 from rest_framework import viewsets, status as status_code
 from rest_framework.response import Response
@@ -11,7 +10,7 @@ from rest_framework.exceptions import NotAcceptable, NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.decorators import action
-from rest_framework.parsers import JSONParser, MultiPartParser, FileUploadParser
+from rest_framework.parsers import MultiPartParser
 
 from utils.generals import get_model
 from utils.pagination import build_result_pagination
@@ -54,7 +53,6 @@ class OrderApiView(viewsets.ViewSet):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._context = {}
-        self._user = None
         self._uuid = None
 
     def dispatch(self, request, *args, **kwargs):
@@ -66,7 +64,7 @@ class OrderApiView(viewsets.ViewSet):
         return Order.objects \
             .prefetch_related('customer', 'branch', 'barberman', 'rating') \
             .select_related('customer', 'branch', 'barberman', 'rating') \
-            .filter(Q(customer_id=self._user.id) | Q(assigned__cashier_id=self._user.id))
+            .filter(Q(customer_id=self.request.user.id) | Q(assigned__cashier_id=self.request.user.id))
 
     def _get_instance(self):
         try:
@@ -75,8 +73,29 @@ class OrderApiView(viewsets.ViewSet):
             raise NotFound()
 
     def list(self, request, format='json'):
-        self._user = request.user
         instances = self._get_instances()
+        params = request.query_params
+        timelapse = params.get('timelapse')
+
+        # cashier see booking by date now and tomorrow
+        if request.user.is_cashier:
+            date = None
+
+            if timelapse == 'today':
+                year = timezone.datetime.today().year
+                month = timezone.datetime.today().month
+                day = timezone.datetime.today().day
+                date = timezone.datetime(year, month, day)
+            elif timelapse == 'tomorrow':
+                tomorrow = timezone.datetime.today() + timezone.timedelta(days=1)
+                year = tomorrow.year
+                month = tomorrow.month
+                day = tomorrow.day
+                date = timezone.datetime(year, month, day)
+
+            if date:
+                instances = instances.filter(reserved_date=date)
+
         paginator = _PAGINATOR.paginate_queryset(instances, request)
         serializer = ListOrderSerializer(paginator, context=self._context,
                                          many=True)
@@ -84,7 +103,6 @@ class OrderApiView(viewsets.ViewSet):
         return Response(results, status=status_code.HTTP_200_OK)
 
     def retrieve(self, request, uuid=None, format=None):
-        self._user = request.user
         instance = self._get_instance()
         serializer = RetrieveOrderSerializer(instance, many=False,
                                              context=self._context)
@@ -92,7 +110,6 @@ class OrderApiView(viewsets.ViewSet):
 
     @transaction.atomic()
     def create(self, request, format='json'):
-        self._user = request.user
         serializer = CreateOrderSerializer(data=request.data, context=self._context,
                                            many=False)
         if serializer.is_valid(raise_exception=True):
@@ -123,7 +140,6 @@ class OrderApiView(viewsets.ViewSet):
                 "rsuggestion": "text"
             }
         """
-        self._user = request.user
         instance = self._get_instance()
         self._context.update({'order': instance})
         serializer = CreateOrderRatingSerializer(data=request.data, context=self._context,
@@ -178,7 +194,6 @@ class OrderApiView(viewsets.ViewSet):
                 "file": "file object"
             }
         """
-        self._user = request.user
         order = self._get_instance()
         self._context.update({'order': order})
         serializer = OrderAttachmentSerializer(data=request.data, many=False,
@@ -201,9 +216,14 @@ class OrderApiView(viewsets.ViewSet):
             raise NotAcceptable(detail=_("Year not defined"))
 
         attachments = Order.objects \
-            .prefetch_related('customer', 'attachments') \
-            .select_related('customer') \
-            .filter(reserved_date__year=year, customer_id=request.user.id)
+            .prefetch_related('customer', 'barberman', 'attachments') \
+            .select_related('customer', 'barberman') \
+            .filter(
+                Q(attachments__isnull=False),
+                Q(reserved_date__year=year),
+                Q(customer_id=request.user.id)
+                | Q(barberman__user_id=request.user.id)
+            )
 
         serializer = HistoryOrderSerializer(
             attachments, many=True, context=self._context)

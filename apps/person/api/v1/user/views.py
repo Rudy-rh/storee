@@ -218,8 +218,8 @@ class UserApiView(viewsets.ViewSet):
 
         self._uuid = user.uuid
         instance = self._get_instance()
-        serializer = BaseUserSerializer(instance, many=False,
-                                        context=self._context)
+        serializer = RetrieveUserSerializer(instance, many=False,
+                                            context=self._context)
         return Response(serializer.data, status=response_status.HTTP_200_OK)
 
     # Sub-action logout!

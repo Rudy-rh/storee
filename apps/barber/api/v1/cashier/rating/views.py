@@ -27,9 +27,11 @@ class OrderRatingApiView(viewsets.ViewSet):
         context = {'request': request}
         user = request.user
         instances = OrderRating.objects \
-            .prefetch_related('assigned', 'assigned__cashier', 'order', 'order__customer') \
-            .select_related('assigned', 'assigned__cashier', 'order', 'order__customer') \
-            .filter(assigned__cashier_id=user.id)
+            .prefetch_related('assigned', 'assigned__cashier', 'order',
+                              'order__customer', 'order__barberman', 'order__barberman__user') \
+            .select_related('assigned', 'assigned__cashier', 'order',
+                            'order__customer', 'order__barberman', 'order__barberman__user') \
+            .filter(Q(assigned__cashier_id=user.id) | Q(order__barberman__user_id=user.id))
 
         # average
         average = instances.aggregate(
@@ -47,7 +49,8 @@ class OrderRatingApiView(viewsets.ViewSet):
         )
 
         paginator = _PAGINATOR.paginate_queryset(instances, request)
-        serializer = OrderRatingSerializer(paginator, context=context, many=True)
+        serializer = OrderRatingSerializer(
+            paginator, context=context, many=True)
         results = build_result_pagination(self, _PAGINATOR, serializer)
         results.update({'average': average})
         return Response(results, status=response_status.HTTP_200_OK)

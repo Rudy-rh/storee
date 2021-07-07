@@ -93,7 +93,7 @@ class AbstractBrochure(AbstractCommonField):
 
 class AbstractRules(AbstractCommonField):
     label = models.CharField(max_length=255, null=True, blank=True)
-    image = models.ImageField(upload_to='brochure')
+    image = models.ImageField(upload_to='rules')
     position = models.IntegerField(default=1)
     is_active = models.BooleanField(default=False)
 
