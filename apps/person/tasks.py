@@ -1,5 +1,6 @@
 import logging
 import smtplib
+import requests
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -69,7 +70,18 @@ def send_verifycode_msisdn(data):
     passcode = data.get('passcode', None)
 
     if to and passcode:
-        pass
+        url = 'https://api.zuwinda.com/v1/message/send-sms'
+        payload = {
+            "content": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode,
+            "to": to
+        }
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'x-access-key': settings.ZUWINDA_SMS_KEY
+        }
+        r = requests.post(url, json=payload, headers=headers)
+        logging.info(r.status_code)
     else:
         logging.warning(
             _("Tried to send email to non-existing VerifyCode Code"))

@@ -67,6 +67,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost',
     'http://localhost:8100',
     'https://storee-46b6e.web.app',
+    'https://storeebarbershop.com',
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [

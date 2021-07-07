@@ -3,6 +3,8 @@ from django.db.models import Q
 from django.contrib.auth.models import Group
 from utils.generals import get_model
 
+from .tasks import send_verifycode_msisdn
+
 Profile = get_model('person', 'Profile')
 
 
@@ -47,7 +49,7 @@ def verifycode_save_handler(sender, instance, created, **kwargs):
         # Send via SMS
         if instance.msisdn:
             data.update({'msisdn': getattr(instance, 'msisdn', None)})
-            # send_verifycode_msisdn.delay(data) # with celery
+            send_verifycode_msisdn.delay(data)  # with celery
             # send_verifycode_msisdn(data)  # without celery
 
         # mark oldest VerifyCode as expired
