@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Q
@@ -18,7 +20,6 @@ from .serializers import (
     CreateOrderByTakePhotoSerializer,
     CreateOrderRatingSerializer,
     CreateOrderSerializer,
-    HistoryOrderSerializer,
     ListOrderSerializer,
     OrderAttachmentSerializer,
     RetrieveOrderRatingSerializer,
@@ -225,6 +226,27 @@ class OrderApiView(viewsets.ViewSet):
                 | Q(barberman__user_id=request.user.id)
             )
 
-        serializer = HistoryOrderSerializer(
-            attachments, many=True, context=self._context)
-        return Response(serializer.data, status=status_code.HTTP_200_OK)
+        attachments = OrderAttachment.objects \
+            .prefetch_related('order') \
+            .select_related('order') \
+            .filter(
+                Q(order__reserved_date__year=year),
+                Q(order__customer_id=request.user.id)
+                | Q(order__barberman__user_id=request.user.id)
+            )
+
+        tmp = defaultdict(list)
+        for item in attachments:
+            d = item.order.reserved_date.strftime("%Y-%m")
+            image = request.build_absolute_uri(item.file.url)
+            tmp[d].append([image])
+
+        parsed_list = [
+            {
+                'date': k,
+                'year': timezone.datetime.strptime(k, "%Y-%m").year,
+                'files': v
+            } for k, v in tmp.items()
+        ]
+
+        return Response(parsed_list, status=status_code.HTTP_200_OK)
