@@ -39,9 +39,9 @@ class AbstractBranchBarberman(AbstractCommonField):
 
     branch = models.ForeignKey('barber.Branch', on_delete=models.CASCADE,
                                related_name='barbermans')
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                                related_name='barbermans',
-                                limit_choices_to={'groups__name': 'Barberman'})
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                             related_name='barbermans',
+                             limit_choices_to={'groups__name': 'Barberman'})
 
     day = models.IntegerField(choices=Day.choices)
     start_hour = models.TimeField(blank=True, null=True)
