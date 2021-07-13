@@ -18,8 +18,12 @@ ALLOWED_HOSTS = [
 
 # SENTRY
 sentry_sdk.init(
-    dsn="https://03b90e71d21646688b3c26fc13c9de50@o400235.ingest.sentry.io/5570476",
+    dsn="https://2b87568c304c496e9834ed488e06c8dc@o400235.ingest.sentry.io/5863597",
     integrations=[DjangoIntegration()],
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
     traces_sample_rate=1.0,
 
     # If you wish to associate users to errors (assuming you are using

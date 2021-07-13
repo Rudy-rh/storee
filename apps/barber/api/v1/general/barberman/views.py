@@ -24,7 +24,12 @@ class BarbermanApiView(viewsets.ViewSet):
         return BranchBarberman.objects \
             .prefetch_related('branch', 'user') \
             .select_related('branch', 'user') \
-            .filter(branch__is_default=True, day=dnumber)
+            .filter(
+                branch__is_default=True,
+                day=dnumber,
+                is_active=True,
+                is_holiday=False
+            )
 
     def list(self, request, format='json'):
         instances = self._get_instances()
