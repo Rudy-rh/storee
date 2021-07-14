@@ -1,7 +1,9 @@
 import os
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
+from django.db.models.aggregates import Count
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.template.defaultfilters import slugify
@@ -121,8 +123,8 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
     customer = serializers.SlugRelatedField(slug_field='username', write_only=False,
                                             queryset=UserModel.objects.all())
-    barberman = serializers.SlugRelatedField(slug_field='user__username', write_only=False,
-                                             queryset=BranchBarberman.objects.all())
+    barberman = serializers.SlugRelatedField(slug_field='username', write_only=False,
+                                             queryset=UserModel.objects.filter(groups__name='Barberman'))
     styleitem = serializers.SlugRelatedField(slug_field='uuid', write_only=False,
                                              queryset=StyleItem.objects.all(),
                                              required=False)
@@ -153,7 +155,29 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
     @transaction.atomic()
     def create(self, validated_data):
         request = self.context.get('request')
-        instance = Order.objects.create(**validated_data)
+        barberman_as_user = validated_data.pop('barberman', None)
+
+        # get branch barberman from user
+        d = timezone.datetime.now()
+        dnumber = d.strftime("%w")
+
+        try:
+            barberman_in_branch = BranchBarberman.objects \
+                .prefetch_related('branch', 'user') \
+                .select_related('branch', 'user') \
+                .get(
+                    user=barberman_as_user,
+                    branch__is_default=True,
+                    day=dnumber,
+                    is_active=True,
+                    is_holiday=False
+                )
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError(detail=_("Barbeman tidak aktif"))
+
+        instance = Order.objects \
+            .create(barberman=barberman_in_branch, **validated_data)
+
         if instance:
             # direct assigned to Cashier
             user = request.user
