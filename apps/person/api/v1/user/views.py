@@ -61,14 +61,11 @@ class UserApiView(viewsets.ViewSet):
         If :email provided :msisdn not required
         If :email NOT provide :msisdn required
 
-        If :groups not define will used Customer as default groups
-
         {
             "password": "string with special character",
             "username": "string",
             "email": "string email",
             "msisdn": "string number",
-            "groups": "string",                             [optional]
             "verification": {
                 "passcode": "123456",
                 "challenge": "email_validation",
@@ -539,8 +536,6 @@ class UserApiView(viewsets.ViewSet):
 
 
 class TokenObtainPairSerializerExtend(TokenObtainPairSerializer):
-    groups = serializers.ListField(required=False)
-
     def validate(self, attrs):
         context = {}
         data = super().validate(attrs)

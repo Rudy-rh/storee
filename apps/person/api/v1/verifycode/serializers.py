@@ -133,33 +133,6 @@ class ValidateVerifyCodeSerializer(BaseVerifyCodeSerializer):
             raise NotAcceptable(detail=_("Kode verifikasi invalid"))
         return ret
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-
-        # return value if password recovery
-        if instance.challenge == VerifyCode.ChallengeType.PASSWORD_RECOVERY:
-            password_token = None
-            password_uidb64 = None
-            email = getattr(instance, 'email')
-            msisdn = getattr(instance, 'msisdn')
-
-            if email:
-                password_token, password_uidb64 = generate_token_uidb64_with_email(
-                    instance.email)
-
-            if msisdn:
-                password_token, password_uidb64 = generate_token_uidb64_with_msisdn(
-                    instance.msisdn)
-
-            if password_token and password_uidb64:
-                ret.update({
-                    'password_token': password_token,
-                    'password_uidb64': password_uidb64
-                })
-
-        ret['passcode'] = instance.passcode
-        return ret
-
     @transaction.atomic
     def update(self, instance, validated_data):
         request = self.context.get('request')
@@ -187,3 +160,32 @@ class RetrieveVerifyCodeSerialzer(BaseVerifyCodeSerializer):
         model = VerifyCode
         fields = ('email', 'msisdn', 'challenge', 'token',
                   'valid_until', 'is_verified', 'passcode',)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+
+        # show this after verified
+        if instance.is_verified:
+            # return value if password recovery
+            if instance.challenge == VerifyCode.ChallengeType.PASSWORD_RECOVERY.value:
+                password_token = None
+                password_uidb64 = None
+                email = getattr(instance, 'email')
+                msisdn = getattr(instance, 'msisdn')
+
+                if email:
+                    password_token, password_uidb64 = generate_token_uidb64_with_email(
+                        instance.email)
+
+                if msisdn:
+                    password_token, password_uidb64 = generate_token_uidb64_with_msisdn(
+                        instance.msisdn)
+
+                if password_token and password_uidb64:
+                    ret.update({
+                        'password_token': password_token,
+                        'password_uidb64': password_uidb64
+                    })
+
+            ret.update({'passcode': instance.passcode})
+        return ret
