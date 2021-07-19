@@ -18,8 +18,8 @@ class BarbermanApiView(viewsets.ViewSet):
         return super().dispatch(request, *args, **kwargs)
 
     def _get_instances(self):
-        d = timezone.datetime.now()
-        dnumber = d.strftime("%w")
+        d = timezone.datetime.today()
+        dnumber = d.weekday()
 
         return BranchBarberman.objects \
             .prefetch_related('branch', 'user') \
@@ -27,6 +27,8 @@ class BarbermanApiView(viewsets.ViewSet):
             .filter(
                 branch__is_default=True,
                 day=dnumber,
+                is_active=True,
+                is_holiday=False
             )
 
     def list(self, request, format='json'):
