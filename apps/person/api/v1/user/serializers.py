@@ -1,12 +1,9 @@
-from datetime import datetime
-
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
 from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
-from django.utils.text import slugify
 from django.core.validators import EmailValidator
 from django.contrib.auth.models import Group
 
@@ -14,6 +11,7 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from utils.generals import get_model
+from apps.person.utils.generator import generate_username
 from apps.person.api.validator import (
     EmailDuplicateValidator,
     MsisdnDuplicateValidator,
@@ -191,11 +189,7 @@ class CreateUserSerializer(BaseUserSerializer):
 
         # create username
         if 'username' not in data:
-            # current date and time
-            now = datetime.now()
-            xchar = data['first_name'][:4]
-            xtime = str(datetime.timestamp(now)).split('.', 1)[0]
-            username = slugify('{}-{}'.format(xchar, xtime))
+            username = generate_username(data['first_name'])
             data['username'] = username
 
         # get groups

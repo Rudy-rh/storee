@@ -27,8 +27,6 @@ class BarbermanApiView(viewsets.ViewSet):
             .filter(
                 branch__is_default=True,
                 day=dnumber,
-                is_active=True,
-                is_holiday=False
             )
 
     def list(self, request, format='json'):
