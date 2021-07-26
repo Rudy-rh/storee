@@ -87,12 +87,14 @@ class OrderApiView(viewsets.ViewSet):
                 month = timezone.datetime.today().month
                 day = timezone.datetime.today().day
                 date = timezone.datetime(year, month, day)
+                instances = instances.filter(is_booking=True)
             elif timelapse == 'tomorrow':
                 tomorrow = timezone.datetime.today() + timezone.timedelta(days=1)
                 year = tomorrow.year
                 month = tomorrow.month
                 day = tomorrow.day
                 date = timezone.datetime(year, month, day)
+                instances = instances.filter(is_booking=True)
 
             if date:
                 instances = instances.filter(reserved_date=date)

@@ -54,6 +54,36 @@ class User(AbstractUser):
     class Meta(AbstractUser.Meta):
         app_label = 'person'
 
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance._state.adding = False
+        instance._state.db = db
+        instance._old_values = dict(zip(field_names, values))
+        return instance
+
+    def data_changed(self, fields):
+        """
+        example:
+        if self.data_changed(['street', 'street_no', 'zip_code', 'city', 'country']):
+            print("one of the fields changed")
+
+        returns true if the model saved the first time and _old_values doesnt exist
+
+        :param fields:
+        :return:
+        """
+        if hasattr(self, '_old_values'):
+            if not self.pk or not self._old_values:
+                return True
+
+            for field in fields:
+                if getattr(self, field) != self._old_values[field]:
+                    return True
+            return False
+
+        return True
+
     def clean(self, *args, **kwargs) -> None:
         return super().clean()
 
@@ -102,6 +132,36 @@ class User(AbstractUser):
     def mark_msisdn_verified(self):
         self.is_msisdn_verified = True
         self.save(update_fields=['is_msisdn_verified'])
+
+    @transaction.atomic()
+    def generate_qrcode(self):
+        qr_data = self.username
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=2,
+        )
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+        img = qr.make_image()
+
+        timestamp = calendar.timegm(time.gmtime())
+        file = open('qrcode.png', 'w+b')
+        img.save(file)
+
+        filename = '%s-%s.png' % (qr_data, timestamp)
+        filebuffer = InMemoryUploadedFile(
+            file, None, filename, 'image/png', file.tell(), None)
+
+        self.profile.qrcode.save(filename, filebuffer, save=False)
+        self.profile.save()
+        file.close()
+
+    def save(self, *args, **kwargs):
+        if self.data_changed(['username']):
+            self.generate_qrcode()
+        return super().save(*args, **kwargs)
 
 
 class AbstractProfile(models.Model):
