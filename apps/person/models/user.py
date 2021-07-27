@@ -159,7 +159,7 @@ class User(AbstractUser):
         file.close()
 
     def save(self, *args, **kwargs):
-        if self.data_changed(['username']):
+        if self.data_changed(['username']) and hasattr(self, 'profile'):
             self.generate_qrcode()
         return super().save(*args, **kwargs)
 
