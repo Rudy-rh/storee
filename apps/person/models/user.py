@@ -159,7 +159,7 @@ class User(AbstractUser):
         file.close()
 
     def save(self, *args, **kwargs):
-        if self.data_changed(['username']) and hasattr(self, 'profile'):
+        if self.pk and self.data_changed(['username']) and hasattr(self, 'profile'):
             self.generate_qrcode()
         return super().save(*args, **kwargs)
 
@@ -204,7 +204,8 @@ class AbstractProfile(models.Model):
         return self.user.username
 
     def save(self, *args, **kwargs):
-        self.generate_qrcode()
+        if not self.pk:
+            self.generate_qrcode()
         return super().save(*args, **kwargs)
 
     @property

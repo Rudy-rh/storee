@@ -218,16 +218,6 @@ class OrderApiView(viewsets.ViewSet):
         if not year:
             raise NotAcceptable(detail=_("Year not defined"))
 
-        attachments = Order.objects \
-            .prefetch_related('customer', 'barberman', 'attachments') \
-            .select_related('customer', 'barberman') \
-            .filter(
-                Q(attachments__isnull=False),
-                Q(reserved_date__year=year),
-                Q(customer_id=request.user.id)
-                | Q(barberman__user_id=request.user.id)
-            )
-
         attachments = OrderAttachment.objects \
             .prefetch_related('order') \
             .select_related('order') \
