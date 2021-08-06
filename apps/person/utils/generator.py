@@ -42,8 +42,13 @@ def generate_username(full_name):
             .values('username')
 
         if len(users) > 0:
-            last_number_used = map(lambda x: int(
-                x['username'].replace(username, '')), users)
+            last_number_used = list(
+                map(
+                    lambda x: int(x['username'].replace(username, '')),
+                    users
+                )
+            )
+
             last_number_used.sort()
             last_number_used = last_number_used[-1]
             number = last_number_used + 1
