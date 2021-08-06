@@ -147,8 +147,8 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         data = super().to_internal_value(data)
-        data['reserved_date'] = timezone.datetime.now().date()
-        data['reserved_time'] = timezone.datetime.now().time()
+        data['reserved_date'] = timezone.datetime.today().date()
+        data['reserved_time'] = timezone.datetime.today().time()
         data['status'] = Order.Status.DONE
         return data
 
@@ -158,8 +158,8 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
         barberman_as_user = validated_data.pop('barberman', None)
 
         # get branch barberman from user
-        d = timezone.datetime.now()
-        dnumber = d.strftime("%w")
+        d = timezone.datetime.today()
+        dnumber = int(d.strftime("%w"))
 
         try:
             barberman_in_branch = BranchBarberman.objects \
@@ -168,12 +168,13 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
                 .get(
                     user=barberman_as_user,
                     branch__is_default=True,
-                    day=dnumber,
+                    day=dnumber - 1,
                     is_active=True,
                     is_holiday=False
                 )
         except ObjectDoesNotExist:
-            raise serializers.ValidationError(detail=_("Barbeman tidak aktif"))
+            raise serializers.ValidationError(
+                detail=_("Barberman tidak aktif"))
 
         instance = Order.objects \
             .create(barberman=barberman_in_branch, **validated_data)
