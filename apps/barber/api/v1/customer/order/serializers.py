@@ -159,7 +159,7 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
 
         # get branch barberman from user
         d = timezone.datetime.today()
-        dnumber = int(d.strftime("%w"))
+        dnumber = d.weekday()
 
         try:
             barberman_in_branch = BranchBarberman.objects \
@@ -168,7 +168,7 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
                 .get(
                     user=barberman_as_user,
                     branch__is_default=True,
-                    day=dnumber - 1,
+                    day=dnumber,
                     is_active=True,
                     is_holiday=False
                 )
