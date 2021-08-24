@@ -29,6 +29,8 @@ PROJECT_APPS = [
     'channels',
     'corsheaders',
     'rest_framework',
+    'simple_history',
+
     'apps.person',
     'apps.barber',
     'apps.notifier',
