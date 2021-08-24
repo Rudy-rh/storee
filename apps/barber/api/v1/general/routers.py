@@ -10,6 +10,8 @@ from .brochure.views import BrochureApiView
 from .rules.views import RulesApiView
 from .branch.views import BranchApiView
 from .standard.views import GroupApiView
+from .banner.views import BannerApiView
+from .information.views import InformationApiView
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter(trailing_slash=True)
@@ -20,6 +22,8 @@ router.register('brochures', BrochureApiView, basename='brochure')
 router.register('rules', RulesApiView, basename='rules')
 router.register('groups', GroupApiView, basename='group')
 router.register('branchs', BranchApiView, basename='branch')
+router.register('banners', BannerApiView, basename='banner')
+router.register('informations', InformationApiView, basename='information')
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [

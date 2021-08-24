@@ -140,3 +140,30 @@ if not is_model_registered('barber', 'WorkStandardSection'):
             db_table = 'barber_work_standard_section'
 
     __all__.append('WorkStandardSection')
+
+
+# 16
+if not is_model_registered('barber', 'Banner'):
+    class Banner(AbstractBanner):
+        class Meta(AbstractBanner.Meta):
+            db_table = 'barber_banner'
+
+    __all__.append('Banner')
+
+
+# 17
+if not is_model_registered('barber', 'Information'):
+    class Information(AbstractInformation):
+        class Meta(AbstractInformation.Meta):
+            db_table = 'barber_information'
+
+    __all__.append('Information')
+
+
+# 18
+if not is_model_registered('barber', 'InformationRead'):
+    class InformationRead(AbstractInformationRead):
+        class Meta(AbstractInformationRead.Meta):
+            db_table = 'barber_information_read'
+
+    __all__.append('InformationRead')

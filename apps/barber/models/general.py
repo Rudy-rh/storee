@@ -2,6 +2,7 @@ import os
 
 from django.db import models
 from django.contrib.auth.models import Group
+from django.conf import settings
 
 from .abstract import AbstractCommonField
 
@@ -143,3 +144,58 @@ class AbstractWorkStandardSection(AbstractCommonField):
 
     def __str__(self) -> str:
         return self.label
+
+
+class AbstractBanner(AbstractCommonField):
+    label = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    image = models.ImageField(upload_to='banner')
+    position = models.IntegerField(default=1)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+
+    def __str__(self) -> str:
+        return self.label
+
+
+class AbstractInformation(AbstractCommonField):
+    label = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    image = models.ImageField(
+        upload_to='information',
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+
+    def __str__(self) -> str:
+        return self.label
+
+
+class AbstractInformationRead(AbstractCommonField):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='informations_read',
+        on_delete=models.CASCADE
+    )
+    information = models.ForeignKey(
+        'barber.Information',
+        related_name='informations_read',
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        abstract = True
+        app_label = 'barber'
+        ordering = ['-create_at']
+
+    def __str__(self) -> str:
+        return self.information.label

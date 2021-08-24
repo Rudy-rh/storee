@@ -17,6 +17,8 @@ Brochure = get_model('barber', 'Brochure')
 Rules = get_model('barber', 'Rules')
 WorkStandardCategory = get_model('barber', 'WorkStandardCategory')
 WorkStandardSection = get_model('barber', 'WorkStandardSection')
+Banner = get_model('barber', 'Banner')
+Information = get_model('barber', 'Information')
 
 
 class StyleAttachmentInline(admin.StackedInline):
@@ -67,3 +69,5 @@ admin.site.register(Brochure)
 admin.site.register(Rules)
 admin.site.register(WorkStandardCategory)
 admin.site.register(WorkStandardSection)
+admin.site.register(Banner)
+admin.site.register(Information)

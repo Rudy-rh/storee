@@ -31,6 +31,7 @@ PROJECT_APPS = [
     'rest_framework',
     'apps.person',
     'apps.barber',
+    'apps.notifier',
 ]
 INSTALLED_APPS = INSTALLED_APPS + PROJECT_APPS
 
