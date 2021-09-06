@@ -1,8 +1,9 @@
 from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.contrib.auth.models import Group
-from utils.generals import get_model
+from django.conf import settings
 
+from utils.generals import get_model
 from .tasks import send_verifycode_msisdn
 
 Profile = get_model('person', 'Profile')
@@ -40,17 +41,18 @@ def verifycode_save_handler(sender, instance, created, **kwargs):
     if instance.is_used == False and instance.is_verified == False:
         data = {'passcode': getattr(instance, 'passcode', None)}
 
-        # Send via email
-        if instance.email:
-            data.update({'email': getattr(instance, 'email', None)})
-            # send_verifycode_email.delay(data) # with celery
-            # send_verifycode_email(data)  # without celery
+        if settings.DEBUG == False:
+            # Send via email
+            if instance.email:
+                data.update({'email': getattr(instance, 'email', None)})
+                # send_verifycode_email.delay(data) # with celery
+                # send_verifycode_email(data)  # without celery
 
-        # Send via SMS
-        if instance.msisdn:
-            data.update({'msisdn': getattr(instance, 'msisdn', None)})
-            send_verifycode_msisdn.delay(data)  # with celery
-            # send_verifycode_msisdn(data)  # without celery
+            # Send via SMS
+            if instance.msisdn:
+                data.update({'msisdn': getattr(instance, 'msisdn', None)})
+                send_verifycode_msisdn.delay(data)  # with celery
+                # send_verifycode_msisdn(data)  # without celery
 
         # mark oldest VerifyCode as expired
         obtain = instance.msisdn or instance.email

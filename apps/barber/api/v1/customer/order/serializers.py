@@ -86,7 +86,7 @@ class CreateOrderRatingSerializer(BaseOrderRatingSerializer):
             'rsuggestion': validated_data.pop('rsuggestion')
         }
         instance, _created = OrderRating.objects \
-            .update_or_create(order=order, defaults=defaults, **validated_data)
+            .get_or_create(order=order, defaults=defaults, **validated_data)
         return instance
 
 

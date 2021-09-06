@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
-from rest_framework import viewsets, status as status_code
+from rest_framework import viewsets, status as response_status
 from rest_framework.response import Response
 from rest_framework.exceptions import NotAcceptable, NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -103,13 +103,13 @@ class OrderApiView(viewsets.ViewSet):
         serializer = ListOrderSerializer(paginator, context=self._context,
                                          many=True)
         results = build_result_pagination(self, _PAGINATOR, serializer)
-        return Response(results, status=status_code.HTTP_200_OK)
+        return Response(results, status=response_status.HTTP_200_OK)
 
     def retrieve(self, request, uuid=None, format=None):
         instance = self._get_instance()
         serializer = RetrieveOrderSerializer(instance, many=False,
                                              context=self._context)
-        return Response({'result': serializer.data}, status=status_code.HTTP_200_OK)
+        return Response({'result': serializer.data}, status=response_status.HTTP_200_OK)
 
     @transaction.atomic()
     def create(self, request, format='json'):
@@ -123,8 +123,8 @@ class OrderApiView(viewsets.ViewSet):
 
             _serializer = RetrieveOrderSerializer(serializer.instance, many=False,
                                                   context=self._context)
-            return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)
+            return Response(_serializer.data, status=response_status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=response_status.HTTP_406_NOT_ACCEPTABLE)
 
     @transaction.atomic()
     @action(detail=True, methods=['post'], url_name='rating', url_path='rating')
@@ -155,8 +155,8 @@ class OrderApiView(viewsets.ViewSet):
 
             _serializer = RetrieveOrderRatingSerializer(serializer.instance, many=False,
                                                         context=self._context)
-            return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)
+            return Response(_serializer.data, status=response_status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=response_status.HTTP_406_NOT_ACCEPTABLE)
 
     # create order by cashier
     @transaction.atomic()
@@ -183,8 +183,8 @@ class OrderApiView(viewsets.ViewSet):
 
             _serializer = RetrieveOrderSerializer(serializer.instance, many=False,
                                                   context=self._context)
-            return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)
+            return Response(_serializer.data, status=response_status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=response_status.HTTP_406_NOT_ACCEPTABLE)
 
     @transaction.atomic()
     @action(detail=True, methods=['post'], url_name='attachment', url_path='attachments',
@@ -209,8 +209,8 @@ class OrderApiView(viewsets.ViewSet):
 
             _serializer = RetrieveOrderSerializer(serializer.instance.order, many=False,
                                                   context=self._context)
-            return Response(_serializer.data, status=status_code.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status_code.HTTP_406_NOT_ACCEPTABLE)
+            return Response(_serializer.data, status=response_status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=response_status.HTTP_406_NOT_ACCEPTABLE)
 
     @action(detail=False, methods=['get'], url_name='history', url_path='histories')
     def history(self, request, format=None):
@@ -241,4 +241,4 @@ class OrderApiView(viewsets.ViewSet):
             } for k, v in tmp.items()
         ]
 
-        return Response(parsed_list, status=status_code.HTTP_200_OK)
+        return Response(parsed_list, status=response_status.HTTP_200_OK)

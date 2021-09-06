@@ -34,6 +34,8 @@ class RootApiView(APIView):
                                               format=format, current_app='barber'),
                 },
                 'general': {
+                    'stat': reverse('barber_api:general:stat', request=request,
+                                    format=format, current_app='feeder'),
                     'styles': reverse('barber_api:general:style-list', request=request,
                                       format=format, current_app='barber'),
                     'styles-oty': reverse('barber_api:general:style_oty-list', request=request,
@@ -48,6 +50,8 @@ class RootApiView(APIView):
                                        format=format, current_app='barber'),
                     'groups': reverse('barber_api:general:group-list', request=request,
                                       format=format, current_app='barber'),
+                    'informations': reverse('barber_api:general:information-list', request=request,
+                                            format=format, current_app='barber'),
                 }
             }
         })

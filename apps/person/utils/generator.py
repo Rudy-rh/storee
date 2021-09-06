@@ -32,8 +32,8 @@ def generate_token_uidb64_with_msisdn(msisdn):
 
 
 def generate_username(full_name):
-    name = full_name.split(' ')
-    username = slugify(name[0])
+    name = list(slugify(full_name).replace('-', ''))
+    username = ''.join(name[0:5])
 
     if UserModel.objects.filter(username=username).count() > 0:
         users = UserModel.objects \

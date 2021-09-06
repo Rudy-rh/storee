@@ -1,6 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 
-from rest_framework import viewsets, status as status_code
+from rest_framework import viewsets, status as response_status
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
@@ -36,7 +36,7 @@ class StyleApiView(viewsets.ViewSet):
         instances = self._get_instances()
         serializer = ListStyleSerializer(instances, many=True,
                                          context=self._context)
-        return Response({'results': serializer.data}, status=status_code.HTTP_200_OK)
+        return Response({'results': serializer.data}, status=response_status.HTTP_200_OK)
 
     def retrieve(self, request, uuid=None, format=None):
         try:
@@ -46,7 +46,7 @@ class StyleApiView(viewsets.ViewSet):
 
         serializer = RetrieveStyleSerializer(instance, many=False,
                                              context=self._context)
-        return Response({'result': serializer.data}, status=status_code.HTTP_200_OK)
+        return Response({'result': serializer.data}, status=response_status.HTTP_200_OK)
 
 
 class StyleOfTheYearApiView(viewsets.ViewSet):
@@ -65,4 +65,4 @@ class StyleOfTheYearApiView(viewsets.ViewSet):
         instances = self._get_instances()
         serializer = ListStyleOfTheYearSerializer(instances, many=True,
                                                   context=self._context)
-        return Response({'results': serializer.data}, status=status_code.HTTP_200_OK)
+        return Response({'results': serializer.data}, status=response_status.HTTP_200_OK)

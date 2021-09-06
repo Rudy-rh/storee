@@ -162,4 +162,6 @@ class AbstractOrderAttachment(AbstractCommonField):
         if not self.label:
             base = os.path.basename(self.file.name)
             self.label = base
+
+        self.filesize = self.file.size
         super().save(*args, **kwargs)

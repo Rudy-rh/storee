@@ -1,5 +1,5 @@
 from django.utils import timezone
-from rest_framework import viewsets, status as status_code
+from rest_framework import viewsets, status as response_status
 from rest_framework.response import Response
 
 from utils.generals import get_model
@@ -35,4 +35,4 @@ class BarbermanApiView(viewsets.ViewSet):
         instances = self._get_instances()
         serializer = BarbermanSerializer(instances, many=True,
                                          context=self._context)
-        return Response({'results': serializer.data}, status=status_code.HTTP_200_OK)
+        return Response({'results': serializer.data}, status=response_status.HTTP_200_OK)
