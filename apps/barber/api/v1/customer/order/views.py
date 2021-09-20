@@ -35,8 +35,15 @@ _PAGINATOR = LimitOffsetPagination()
 
 class OrderApiView(viewsets.ViewSet):
     """
-    POST;
+    GET
     -------
+
+        ../?timelapse=<customer,today,tomorrow,all>
+
+
+    POST
+    -------
+
         Format;
         {
             "reserved_date": "2021-06-20",
@@ -65,7 +72,11 @@ class OrderApiView(viewsets.ViewSet):
         return Order.objects \
             .prefetch_related('customer', 'branch', 'barberman', 'rating') \
             .select_related('customer', 'branch', 'barberman', 'rating') \
-            .filter(Q(customer_id=self.request.user.id) | Q(assigned__cashier_id=self.request.user.id))
+            .filter(
+                Q(customer_id=self.request.user.id)
+                | Q(assigned__cashier_id=self.request.user.id)
+                | Q(barberman__user_id=self.request.user.id)
+            )
 
     def _get_instance(self):
         try:
@@ -78,16 +89,20 @@ class OrderApiView(viewsets.ViewSet):
         params = request.query_params
         timelapse = params.get('timelapse')
 
-        # cashier see booking by date now and tomorrow
+        # as cashier see booking by date now and tomorrow
         if request.user.is_cashier:
             date = None
 
-            if timelapse == 'today':
+            if timelapse == 'today' or timelapse == 'customer':
                 year = timezone.datetime.today().year
                 month = timezone.datetime.today().month
                 day = timezone.datetime.today().day
                 date = timezone.datetime(year, month, day)
-                instances = instances.filter(is_booking=True)
+                if timelapse == 'today':
+                    instances = instances.filter(is_booking=True)
+                elif timelapse == 'customer':
+                    # all customer booking or not
+                    instances = instances.filter(is_booking=False)
             elif timelapse == 'tomorrow':
                 tomorrow = timezone.datetime.today() + timezone.timedelta(days=1)
                 year = tomorrow.year
@@ -98,6 +113,10 @@ class OrderApiView(viewsets.ViewSet):
 
             if date:
                 instances = instances.filter(reserved_date=date)
+
+        # as barberman
+        if request.user.is_barberman:
+            instances = instances.filter(is_booking=True)
 
         paginator = _PAGINATOR.paginate_queryset(instances, request)
         serializer = ListOrderSerializer(paginator, context=self._context,

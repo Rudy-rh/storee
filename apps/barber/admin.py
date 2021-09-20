@@ -24,6 +24,15 @@ InformationRead = get_model('barber', 'InformationRead')
 
 class StyleAttachmentInline(admin.StackedInline):
     model = StyleAttachment
+    readonly_fields = ['image_preview', ]
+
+    def image_preview(self, instance):
+        from django.utils.html import escape
+        from django.utils.safestring import mark_safe
+
+        return mark_safe('<img src="%s" width="120" />' %
+                         escape(instance.image.url))
+    image_preview.allow_tags = True
 
 
 class BranchBarbermanInline(admin.StackedInline):
@@ -49,6 +58,21 @@ class OrderAttachmentInline(admin.StackedInline):
 class StyleItemExtend(admin.ModelAdmin):
     model = StyleItem
     inlines = [StyleAttachmentInline, ]
+    list_display = ['label', 'image_preview', ]
+
+    def image_preview(self, instance):
+        from django.utils.html import escape
+        from django.utils.safestring import mark_safe
+
+        images = []
+        attachments = instance.attachments.all()
+        for attach in attachments:
+            image = mark_safe('<img src="%s" width="100" />' %
+                              escape(attach.image.url))
+            images.append(image)
+        return mark_safe(''.join(images))
+    image_preview.short_description = "Image"
+    image_preview.allow_tags = True
 
 
 class OrderExtend(admin.ModelAdmin):
@@ -61,6 +85,12 @@ class BranchExtend(admin.ModelAdmin):
     inlines = [BranchBarbermanInline, BranchCashierInline, ]
 
 
+class WorkStandardSectionExtend(admin.ModelAdmin):
+    model = WorkStandardSection
+    list_filter = ['category', ]
+    list_display = ['label', 'category', ]
+
+
 admin.site.register(StyleCategory)
 admin.site.register(StyleItem, StyleItemExtend)
 admin.site.register(StyleOfTheYear)
@@ -69,7 +99,7 @@ admin.site.register(Branch, BranchExtend)
 admin.site.register(Brochure)
 admin.site.register(Rules)
 admin.site.register(WorkStandardCategory)
-admin.site.register(WorkStandardSection)
+admin.site.register(WorkStandardSection, WorkStandardSectionExtend)
 admin.site.register(Banner)
 admin.site.register(Information)
 admin.site.register(InformationRead)

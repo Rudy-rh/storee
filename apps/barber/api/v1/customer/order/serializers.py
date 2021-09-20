@@ -98,7 +98,8 @@ class RetrieveOrderRatingSerializer(BaseOrderRatingSerializer):
 
 class CreateOrderSerializer(serializers.ModelSerializer):
     customer = serializers.HiddenField(
-        default=serializers.CurrentUserDefault())
+        default=serializers.CurrentUserDefault()
+    )
     barberman = serializers.SlugRelatedField(slug_field='uuid', write_only=False,
                                              queryset=BranchBarberman.objects.all())
     styleitem = serializers.SlugRelatedField(slug_field='uuid', write_only=False,
@@ -109,7 +110,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ('customer', 'barberman', 'reserved_type',
                   'reserved_date', 'reserved_time', 'styleitem',
-                  'note',)
+                  'note', 'is_booking',)
         extra_kwargs = {
             'barberman': {'required': True},
             'styleitem': {
