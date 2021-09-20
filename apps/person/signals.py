@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.conf import settings
 
 from utils.generals import get_model
-from .tasks import send_verifycode_msisdn
+from .tasks import send_verifycode_sms, send_verifycode_whatsapp
 
 Profile = get_model('person', 'Profile')
 
@@ -51,8 +51,9 @@ def verifycode_save_handler(sender, instance, created, **kwargs):
             # Send via SMS
             if instance.msisdn:
                 data.update({'msisdn': getattr(instance, 'msisdn', None)})
-                send_verifycode_msisdn.delay(data)  # with celery
-                # send_verifycode_msisdn(data)  # without celery
+                send_verifycode_whatsapp(data)  # with celery
+                # send_verifycode_sms.delay(data)  # with celery
+                # send_verifycode_sms(data)  # without celery
 
         # mark oldest VerifyCode as expired
         obtain = instance.msisdn or instance.email

@@ -63,14 +63,14 @@ def send_verifycode_email(data):
 
 
 @shared_task
-def send_verifycode_msisdn(data):
-    logging.info(_("Send verifyCode msisdn run"))
+def send_verifycode_sms(data):
+    logging.info(_("Send verifyCode sms run"))
 
     to = data.get('msisdn', None)
     passcode = data.get('passcode', None)
 
     if to and passcode:
-        url = 'https://api.zuwinda.com/v1/message/send-sms'
+        url = 'https://api.zuwinda.com/v1.2/message/sms/send-text'
         payload = {
             "content": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode,
             "to": to
@@ -84,4 +84,34 @@ def send_verifycode_msisdn(data):
         logging.info(r.status_code)
     else:
         logging.warning(
-            _("Tried to send email to non-existing VerifyCode Code"))
+            _("Tried to send sms to non-existing VerifyCode Code"))
+
+
+@shared_task
+def send_verifycode_whatsapp(data):
+    logging.info(_("Send verifyCode whatsapp run"))
+
+    to = data.get('msisdn', None)
+    passcode = data.get('passcode', None)
+
+    # modify msisdn
+    if to.startswith('0'):
+        to = to.replace('0', '62', 1)
+
+    if to and passcode:
+        url = 'https://api.zuwinda.com/v1.2/message/whatsapp/send-text'
+        payload = {
+            "content": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode,
+            "instances_id": "a5bf9998-8cc4-4af2-90a2-1dd908d51e60",
+            "to": to
+        }
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'x-access-key': settings.ZUWINDA_SMS_KEY
+        }
+        r = requests.post(url, json=payload, headers=headers)
+        logging.info(r.status_code)
+    else:
+        logging.warning(
+            _("Tried to send whatsapp to non-existing VerifyCode Code"))
