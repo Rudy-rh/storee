@@ -102,7 +102,7 @@ def send_verifycode_whatsapp(data):
         url = 'https://api.zuwinda.com/v1.2/message/whatsapp/send-text'
         payload = {
             "content": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode,
-            "instances_id": "a5bf9998-8cc4-4af2-90a2-1dd908d51e60",
+            "instances_id": "73c31239-d365-4f0d-86b7-d2d74cf00468",
             "to": to
         }
         headers = {
