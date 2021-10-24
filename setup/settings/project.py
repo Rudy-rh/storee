@@ -11,7 +11,7 @@ PAGINATION_PER_PAGE = 15
 LOGIN_WITH_JWT = True
 # If true in recovery password need make sure account exist
 RECOVERY_PASSWORD_CHECK_ACCOUNT = True
-ZUWINDA_SMS_KEY = '928cfa5aac984a1c93bdd24da5dee441'
+ZUWINDA_SMS_KEY = 'f126e0c5-7777-48e3-a0d0-1e4feeb3bc95'
 
 
 # REGISTRATION REQUIREMENTS
