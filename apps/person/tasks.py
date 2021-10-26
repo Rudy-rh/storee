@@ -78,7 +78,7 @@ def send_verifycode_sms(data):
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'x-access-key': settings.ZUWINDA_SMS_KEY
+            'x-access-key': settings.ZUWINDA_KEY
         }
         r = requests.post(url, json=payload, headers=headers)
         logging.info(r.status_code)
@@ -100,15 +100,16 @@ def send_verifycode_whatsapp(data):
 
     if to and passcode:
         url = 'https://api.zuwinda.com/v1.2/message/whatsapp/send-text'
+
         payload = {
             "content": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode,
-            "instances_id": "73c31239-d365-4f0d-86b7-d2d74cf00468",
+            "instances_id": settings.ZUWINDA_INSTANCES_ID,
             "to": to
         }
         headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'x-access-key': settings.ZUWINDA_SMS_KEY
+            'x-access-key': settings.ZUWINDA_KEY
         }
         r = requests.post(url, json=payload, headers=headers)
         logging.info(r.status_code)
