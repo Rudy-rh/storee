@@ -19,7 +19,8 @@ class UserExtend(UserAdmin):
     form = UserChangeFormExtend
     add_form = UserCreationFormExtend
     inlines = [ProfileInline, ]
-    list_display = ('username', 'first_name', 'email', 'msisdn', 'is_staff')
+    list_display = ('username', 'first_name', 'email', 'msisdn', 'is_staff',)
+    search_fields = ('username', 'first_name', 'email', 'msisdn',)
     fieldsets = (
         (None, {'fields': ('username', 'password', 'email', 'is_email_verified',
                            'msisdn', 'is_msisdn_verified',)}),
