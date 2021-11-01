@@ -20,8 +20,7 @@ class InformationApiView(viewsets.ViewSet):
     def list(self, request):
         context = {'request': request}
         instances = Information.objects \
-            .prefetch_related('informations_read') \
-            .exclude(informations_read__user_id=request.user.id)
+            .prefetch_related('informations_read')
 
         serializer = InformationSerializer(
             instances, context=context, many=True)

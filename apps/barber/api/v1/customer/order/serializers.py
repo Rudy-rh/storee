@@ -196,6 +196,12 @@ class BaseOrderSerializer(serializers.ModelSerializer):
     status_display = serializers.SerializerMethodField()
     rating = RetrieveOrderRatingSerializer(read_only=True)
 
+    customer = serializers.CharField(source='customer.name', read_only=True)
+    customer_phone = serializers.CharField(
+        source='customer.msisdn',
+        read_only=True
+    )
+
     def get_reserved_type(self, instance):
         return instance.get_reserved_type_display()
 
@@ -216,12 +222,11 @@ class ListOrderSerializer(BaseOrderSerializer):
         model = Order
         fields = ('create_at', 'date', 'reserved_date', 'reserved_time', 'url',
                   'uuid', 'reserved_type', 'styleitem', 'status', 'status_display',
-                  'note', 'rating',)
+                  'note', 'rating', 'customer', 'customer_phone',)
 
 
 class RetrieveOrderSerializer(BaseOrderSerializer):
     attachments = OrderAttachmentSerializer(many=True)
-    customer = serializers.CharField(source='customer.name')
     barberman = serializers.CharField(source='barberman.user.name')
 
     class Meta:

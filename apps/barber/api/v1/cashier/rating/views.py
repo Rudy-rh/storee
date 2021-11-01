@@ -34,11 +34,11 @@ class OrderRatingApiView(viewsets.ViewSet):
             .filter(Q(assigned__cashier_id=user.id) | Q(order__barberman__user_id=user.id))
 
         # average
-        average = instances.aggregate(
-            avg_rmanagement=Round(Avg('rmanagement'), precision=3),
-            avg_rhygiene=Round(Avg('rhygiene'), precision=3),
-            avg_rcashier=Round(Avg('rcashier'), precision=3),
-            avg_rbarberman=Round(Avg('rbarberman'), precision=3),
+        average = instances.filter(order__status='done').aggregate(
+            avg_rmanagement=Avg('rmanagement'),
+            avg_rhygiene=Avg('rhygiene'),
+            avg_rcashier=Avg('rcashier'),
+            avg_rbarberman=Avg('rbarberman'),
 
             cashier_star_count=Count('rcashier'),
             cashier_star_1_count=Count('rcashier', filter=Q(rcashier=1)),

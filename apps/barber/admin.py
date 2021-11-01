@@ -30,13 +30,6 @@ class StyleAttachmentInline(admin.StackedInline):
         from django.utils.html import escape
         from django.utils.safestring import mark_safe
 
-        x = '08972526262'
-        y = x.replace('0', '62', 1)
-        print(y)
-
-        if x.startswith('0'):
-            print('AAAAA')
-
         return mark_safe('<img src="%s" width="120" />' %
                          escape(instance.image.url))
     image_preview.allow_tags = True
