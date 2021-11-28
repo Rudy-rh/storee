@@ -1,6 +1,7 @@
 from django.db.models.aggregates import Count, Sum
 from django.db.models.query_utils import Q
 from django.db.models.functions import Round
+from django.utils import timezone
 
 from rest_framework import viewsets, status as response_status
 from rest_framework.pagination import LimitOffsetPagination
@@ -26,12 +27,18 @@ class OrderRatingApiView(viewsets.ViewSet):
     def list(self, request, format='json'):
         context = {'request': request}
         user = request.user
+        until_date = timezone.datetime(2021, 11, 1)
+
         instances = OrderRating.objects \
             .prefetch_related('assigned', 'assigned__cashier', 'order',
                               'order__customer', 'order__barberman', 'order__barberman__user') \
             .select_related('assigned', 'assigned__cashier', 'order',
                             'order__customer', 'order__barberman', 'order__barberman__user') \
-            .filter(Q(assigned__cashier_id=user.id) | Q(order__barberman__user_id=user.id))
+            .filter(
+                Q(assigned__cashier_id=user.id)
+                | Q(order__barberman__user_id=user.id),
+                Q(create_at__gte=until_date)
+            )
 
         # average
         average = instances.filter(order__status='done').aggregate(

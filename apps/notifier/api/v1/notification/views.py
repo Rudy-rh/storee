@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as DjangoValidationError
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from rest_framework import viewsets, status as response_status
@@ -68,8 +69,12 @@ class NotificationApiView(viewsets.ViewSet):
                 members__user_id=self.request.user.id
             )
 
+        until_date = timezone.datetime(2021, 11, 1)
         order = Order.objects \
-            .filter(id=OuterRef('action_object_object_id'))
+            .filter(
+                id=OuterRef('action_object_object_id'),
+                create_at__gte=until_date
+            )
 
         return self._queryset \
             .annotate(

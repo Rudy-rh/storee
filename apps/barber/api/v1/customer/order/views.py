@@ -69,14 +69,12 @@ class OrderApiView(viewsets.ViewSet):
         return super().dispatch(request, *args, **kwargs)
 
     def _get_instances(self):
+        until_date = timezone.datetime(2021, 11, 1)
+
         return Order.objects \
             .prefetch_related('customer', 'branch', 'barberman', 'rating') \
             .select_related('customer', 'branch', 'barberman', 'rating') \
-            .filter(
-                Q(customer_id=self.request.user.id)
-                | Q(assigned__cashier_id=self.request.user.id)
-                | Q(barberman__user_id=self.request.user.id)
-            )
+            .filter(create_at__gte=until_date)
 
     def _get_instance(self):
         try:
@@ -97,7 +95,7 @@ class OrderApiView(viewsets.ViewSet):
                 year = timezone.datetime.today().year
                 month = timezone.datetime.today().month
                 day = timezone.datetime.today().day
-                date = timezone.datetime(year, month, day)
+                date = timezone.datetime(year, month, day).date()
 
                 if timelapse == 'today':
                     instances = instances.filter(is_booking=True)
@@ -113,7 +111,7 @@ class OrderApiView(viewsets.ViewSet):
                 year = tomorrow.year
                 month = tomorrow.month
                 day = tomorrow.day
-                date = timezone.datetime(year, month, day)
+                date = timezone.datetime(year, month, day).date()
                 instances = instances.filter(is_booking=True)
 
             if date:
@@ -121,7 +119,14 @@ class OrderApiView(viewsets.ViewSet):
 
         # as barberman
         if request.user.is_barberman:
-            instances = instances.filter(is_booking=True)
+            instances = instances.filter(
+                is_booking=True,
+                barberman__user_id=self.request.user.id
+            )
+
+        # as customer
+        if request.user.is_customer:
+            instances = instances.filter(customer_id=self.request.user.id)
 
         paginator = _PAGINATOR.paginate_queryset(instances, request)
         serializer = ListOrderSerializer(paginator, context=self._context,

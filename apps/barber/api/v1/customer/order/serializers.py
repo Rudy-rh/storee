@@ -100,8 +100,9 @@ class CreateOrderSerializer(serializers.ModelSerializer):
     customer = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
-    barberman = serializers.SlugRelatedField(slug_field='uuid', write_only=False,
-                                             queryset=BranchBarberman.objects.all())
+    barberman = serializers.SlugRelatedField(slug_field='uuid', write_only=True,
+                                             queryset=BranchBarberman.objects.all(),
+                                             required=False, allow_null=True)
     styleitem = serializers.SlugRelatedField(slug_field='uuid', write_only=False,
                                              queryset=StyleItem.objects.all(),
                                              required=False)
@@ -112,7 +113,11 @@ class CreateOrderSerializer(serializers.ModelSerializer):
                   'reserved_date', 'reserved_time', 'styleitem',
                   'note', 'is_booking',)
         extra_kwargs = {
-            'barberman': {'required': True},
+            'barberman': {
+                'allow_blank': True,
+                'allow_null': True,
+                'required': False
+            },
             'styleitem': {
                 'allow_blank': True,
                 'allow_null': True,
@@ -227,7 +232,9 @@ class ListOrderSerializer(BaseOrderSerializer):
 
 class RetrieveOrderSerializer(BaseOrderSerializer):
     attachments = OrderAttachmentSerializer(many=True)
-    barberman = serializers.CharField(source='barberman.user.name')
+    barberman = serializers.CharField(source='barberman.user.name',
+                                      read_only=True, required=False,
+                                      default=None, allow_null=True)
 
     class Meta:
         model = Order

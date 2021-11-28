@@ -38,8 +38,8 @@ class AbstractOrder(AbstractCommonField):
                                   related_name='orders', null=True, blank=True)
     barberman = models.ForeignKey('barber.BranchBarberman', on_delete=models.SET_NULL, blank=True,
                                   null=True, limit_choices_to={'user__groups__name': 'Barberman'})
-    branch = models.ForeignKey('barber.Branch', on_delete=models.CASCADE,
-                               related_name='orders', editable=False)
+    branch = models.ForeignKey('barber.Branch', on_delete=models.SET_NULL,
+                               related_name='orders', editable=False, null=True, blank=True)
 
     reserved_type = models.CharField(choices=Types.choices, max_length=5)
     reserved_date = models.DateField(auto_now=False)
@@ -61,9 +61,11 @@ class AbstractOrder(AbstractCommonField):
 
     def save(self, *args, **kwargs):
         # save branch from barberman
-        branch = self.barberman.branch
-        if branch:
-            self.branch = branch
+        if self.barberman:
+            branch = self.barberman.branch
+            if branch:
+                self.branch = branch
+
         return super().save(*args, **kwargs)
 
 
