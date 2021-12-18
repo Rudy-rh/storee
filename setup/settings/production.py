@@ -58,7 +58,7 @@ CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 CSRF_TRUSTED_ORIGINS = [
     'storee-46b6e.web.app',
-    '.storeebarbershop.com'
+    '.storeebarbershop.com',
 ]
 
 
@@ -69,7 +69,9 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost',
+    'https://localhost',
     'http://localhost:8100',
+    'https://localhost:8100',
     'https://storee-46b6e.web.app',
     'https://storeebarbershop.com',
 ]
