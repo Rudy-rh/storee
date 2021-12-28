@@ -27,7 +27,8 @@ class StyleApiView(viewsets.ViewSet):
     def _get_instances(self):
         return StyleCategory.objects \
             .prefetch_related('items', 'items__attachments') \
-            .all()
+            .all() \
+            .order_by('-position')
 
     def _get_instance(self):
         return self._get_instances().get(uuid=self._uuid)

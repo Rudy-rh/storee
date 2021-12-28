@@ -9,6 +9,7 @@ from .abstract import AbstractCommonField
 
 class AbstractStyleCategory(AbstractCommonField):
     label = models.CharField(max_length=255)
+    position = models.IntegerField(default=1)
 
     class Meta:
         abstract = True
@@ -117,6 +118,7 @@ class AbstractWorkStandardCategory(AbstractCommonField):
     groups = models.ForeignKey(Group, on_delete=models.CASCADE,
                                related_name='standard_categories')
     label = models.CharField(max_length=255)
+    position = models.IntegerField(default=1)
 
     class Meta:
         abstract = True
