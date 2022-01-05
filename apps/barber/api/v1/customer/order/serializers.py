@@ -223,6 +223,8 @@ class BaseOrderSerializer(serializers.ModelSerializer):
 
 
 class ListOrderSerializer(BaseOrderSerializer):
+    reserved_time = serializers.TimeField(source='reserved_time_fmt')
+
     class Meta:
         model = Order
         fields = ('create_at', 'date', 'reserved_date', 'reserved_time', 'url',
@@ -235,6 +237,7 @@ class RetrieveOrderSerializer(BaseOrderSerializer):
     barberman = serializers.CharField(source='barberman.user.name',
                                       read_only=True, required=False,
                                       default=None, allow_null=True)
+    reserved_time = serializers.TimeField(source='reserved_time_fmt')
 
     class Meta:
         model = Order

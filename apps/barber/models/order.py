@@ -1,5 +1,6 @@
 import os
 
+from django import forms
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -43,7 +44,7 @@ class AbstractOrder(AbstractCommonField):
 
     reserved_type = models.CharField(choices=Types.choices, max_length=5)
     reserved_date = models.DateField(auto_now=False)
-    reserved_time = models.TimeField(auto_now=True)
+    reserved_time = models.TimeField(auto_now=False)
     note = models.TextField(null=True, blank=True)
     status = models.CharField(choices=Status.choices, default=Status.PENDING,
                               max_length=15)
@@ -67,6 +68,10 @@ class AbstractOrder(AbstractCommonField):
                 self.branch = branch
 
         return super().save(*args, **kwargs)
+
+    @property
+    def reserved_time_fmt(self):
+        return self.reserved_time.strftime('%H:%M:%S')
 
 
 class AbstractOrderAssigned(AbstractCommonField):
