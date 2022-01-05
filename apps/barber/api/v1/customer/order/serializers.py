@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from django.template.defaultfilters import slugify
 
 from rest_framework import serializers
+from apps.person.tasks import send_thanks_to_customer_whatsapp
 from utils.generals import get_model
 
 UserModel = get_user_model()
@@ -189,6 +190,11 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
             # direct assigned to Cashier
             user = request.user
             OrderAssigned.objects.create(order=instance, cashier=user)
+
+            # send thanks to customer
+            customer = validated_data.get('customer')
+            data = {'msisdn': customer.msisdn}
+            send_thanks_to_customer_whatsapp.delay(data)
         return instance
 
 

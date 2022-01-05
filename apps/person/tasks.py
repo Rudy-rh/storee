@@ -116,3 +116,37 @@ def send_verifycode_whatsapp(data):
     else:
         logging.warning(
             _("Tried to send whatsapp to non-existing VerifyCode Code"))
+
+
+@shared_task
+def send_thanks_to_customer_whatsapp(data):
+    logging.info(_("Send thanks whatsapp run"))
+
+    link_to = 'https://storeebarbershop.com/tabs/order'
+
+    # modify msisdn
+    to = data.get('msisdn', None)
+    if to.startswith('0'):
+        to = to.replace('0', '62', 1)
+
+    if to:
+        url = 'https://api.zuwinda.com/v1.2/message/whatsapp/send-text'
+
+        payload = {
+            "content": "Terima kasih sudah berkunjung ke Storeebarbershop.Sorong hari ini."
+            "Mohon dukungan Storeelove untuk memberikan rating penilaian kepada kami(penilaian terhadap Manjemen, Barberman, Kasir dan OB kami). Semoga kami terus menjadi lebih baik. Sila klik link ini %s"
+            "\n\n Terima kasih" % link_to,
+
+            "instances_id": settings.ZUWINDA_INSTANCES_ID,
+            "to": to
+        }
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'x-access-key': settings.ZUWINDA_KEY
+        }
+        r = requests.post(url, json=payload, headers=headers)
+        logging.info(r.status_code)
+    else:
+        logging.warning(
+            _("Tried to send whatsapp to non-existing VerifyCode Code"))

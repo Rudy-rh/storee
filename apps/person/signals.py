@@ -51,7 +51,8 @@ def verifycode_save_handler(sender, instance, created, **kwargs):
             # Send via SMS
             if instance.msisdn:
                 data.update({'msisdn': getattr(instance, 'msisdn', None)})
-                send_verifycode_whatsapp(data)  # with celery
+                send_verifycode_whatsapp.delay(data)  # with celery
+                # send_verifycode_whatsapp(data)  # without celery
                 # send_verifycode_sms.delay(data)  # with celery
                 # send_verifycode_sms(data)  # without celery
 
