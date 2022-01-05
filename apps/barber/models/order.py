@@ -71,7 +71,7 @@ class AbstractOrder(AbstractCommonField):
 
     @property
     def reserved_time_fmt(self):
-        return self.reserved_time.strftime('%H:%M:%S')
+        return self.reserved_time.strftime('%H:%M')
 
 
 class AbstractOrderAssigned(AbstractCommonField):
