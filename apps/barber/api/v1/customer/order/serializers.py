@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -194,7 +195,12 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
             # send thanks to customer
             customer = validated_data.get('customer')
             data = {'msisdn': customer.msisdn}
-            send_thanks_to_customer_whatsapp.delay(data)
+
+            # delay 5 minutes
+            send_date = timezone.datetime.now() + timedelta(minutes=5)
+
+            # send_thanks_to_customer_whatsapp.delay(data)
+            send_thanks_to_customer_whatsapp.apply_async(kwargs=data, eta=send_date)
         return instance
 
 
