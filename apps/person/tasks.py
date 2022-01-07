@@ -119,13 +119,13 @@ def send_verifycode_whatsapp(data):
             _("Tried to send whatsapp to non-existing VerifyCode Code"))
 
 
-@app.task
+@shared_task
 def add(*args, **kwargs):
     print(args, kwargs)
     return 10 + 10
 
 
-@app.task
+@shared_task
 def send_thanks_to_customer_whatsapp(*args, **kwargs):
     logging.info(_("Send thanks whatsapp run"))
 
