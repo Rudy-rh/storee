@@ -120,6 +120,12 @@ def send_verifycode_whatsapp(data):
 
 
 @app.task
+def add(*args, **kwargs):
+    print(args, kwargs)
+    return 10 + 10
+
+
+@app.task
 def send_thanks_to_customer_whatsapp(*args, **kwargs):
     logging.info(_("Send thanks whatsapp run"))
 

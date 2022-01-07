@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from apps.person.tasks import send_thanks_to_customer_whatsapp
+from apps.person.tasks import send_thanks_to_customer_whatsapp, add
 
 from .abstract import AbstractCommonField
 
@@ -70,8 +70,9 @@ class AbstractOrder(AbstractCommonField):
             if branch:
                 self.branch = branch
 
-        data = {'msisdn': '0811806807'}
-        send_thanks_to_customer_whatsapp.s(**data).apply_async(countdown=5)
+        #data = {'msisdn': '0811806807'}
+        #send_thanks_to_customer_whatsapp.s(**data).apply_async(countdown=5)
+        add.apply_async((2, 2), countdown=5)
 
         return super().save(*args, **kwargs)
 
