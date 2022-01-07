@@ -71,7 +71,7 @@ class AbstractOrder(AbstractCommonField):
                 self.branch = branch
 
         data = {'msisdn': '0811806807'}
-        send_thanks_to_customer_whatsapp.apply_async(args=[1, 2], kwargs={'msisdn': '0811806807'}, countdown=5)
+        send_thanks_to_customer_whatsapp.s(data).apply_async(countdown=5)
 
         return super().save(*args, **kwargs)
 
