@@ -1,8 +1,9 @@
+from datetime import timedelta
 import os
 
-from django import forms
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 
@@ -68,6 +69,10 @@ class AbstractOrder(AbstractCommonField):
             branch = self.barberman.branch
             if branch:
                 self.branch = branch
+
+        data = {'msisdn': '0811806807'}
+        send_date = timezone.datetime.now() + timedelta(minutes=5)
+        send_thanks_to_customer_whatsapp.apply_async(**data, eta=send_date)
 
         return super().save(*args, **kwargs)
 

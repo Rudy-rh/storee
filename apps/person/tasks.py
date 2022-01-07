@@ -122,6 +122,8 @@ def send_verifycode_whatsapp(data):
 def send_thanks_to_customer_whatsapp(*args, **kwargs):
     logging.info(_("Send thanks whatsapp run"))
 
+    print(kwargs, 'KWARGSSSS')
+
     link_to = 'https://storeebarbershop.com/tabs/order'
 
     # modify msisdn

@@ -78,6 +78,22 @@ class StyleItemExtend(admin.ModelAdmin):
 class OrderExtend(admin.ModelAdmin):
     model = Order
     inlines = [OrderAssignedInline, OrderRatingInline, OrderAttachmentInline, ]
+    list_display = [
+        'customer',
+        'barberman',
+        'reserved_type',
+        'reserved_date',
+        'reserved_time',
+        'status',
+        'is_booking',
+    ]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related('customer', 'barberman') \
+            .select_related('customer', 'barberman')
+
+        return qs
 
 
 class BranchExtend(admin.ModelAdmin):

@@ -1,4 +1,7 @@
 {
   "editor.tabSize": 4,
-  "python.pythonPath": "D:\\BIN\\Python\\Python310\\python.exe"
+  "python.pythonPath": "d:\\PROGRAMS\\DJANGO3\\venv39\\Scripts\\python.exe",
+  "python.linting.pycodestyleEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true
 }
