@@ -201,7 +201,7 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
 
             # send_thanks_to_customer_whatsapp.delay(data)
             send_thanks_to_customer_whatsapp \
-                .apply_async((msisdn), eta=send_date)
+                .apply_async(args=[msisdn], eta=send_date)
 
         return instance
 
