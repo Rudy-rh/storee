@@ -6,6 +6,8 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from apps.person.tasks import send_thanks_to_customer_whatsapp
+
 from .abstract import AbstractCommonField
 
 
