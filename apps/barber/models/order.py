@@ -70,6 +70,7 @@ class AbstractOrder(AbstractCommonField):
             if branch:
                 self.branch = branch
 
+        """
         msisdn = '0811806807'
         send_date = timezone.datetime.today() + timedelta(seconds=5)
         a = send_thanks_to_customer_whatsapp.apply_async(args=[msisdn], eta=send_date)
@@ -77,6 +78,7 @@ class AbstractOrder(AbstractCommonField):
 
         b = add.apply_async((1, 3), eta=send_date)
         bresult = b.get()
+        """
 
         return super().save(*args, **kwargs)
 
