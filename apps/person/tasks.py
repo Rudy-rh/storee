@@ -126,29 +126,24 @@ def add(*args, **kwargs):
 
 
 @shared_task
-def send_thanks_to_customer_whatsapp(*args, **kwargs):
+def send_thanks_to_customer_whatsapp(msisdn):
     logging.info(_("Send thanks whatsapp run"))
-
-    print(args, 'ARGS...')
-    print(kwargs, 'KWARGSSSS')
 
     link_to = 'https://storeebarbershop.com/tabs/order'
 
     # modify msisdn
-    to = kwargs.get('msisdn', None)
-    if to.startswith('0'):
-        to = to.replace('0', '62', 1)
+    if msisdn:
+        if msisdn.startswith('0'):
+            msisdn = msisdn.replace('0', '62', 1)
 
-    if to:
         url = 'https://api.zuwinda.com/v1.2/message/whatsapp/send-text'
-
         payload = {
             "content": "Terima kasih sudah berkunjung ke Storeebarbershop.Sorong hari ini."
             "Mohon dukungan Storeelove untuk memberikan rating penilaian kepada kami(penilaian terhadap Manjemen, Barberman, Kasir dan OB kami). Semoga kami terus menjadi lebih baik. Sila klik link ini %s"
             "\n\n Terima kasih" % link_to,
 
             "instances_id": settings.ZUWINDA_INSTANCES_ID,
-            "to": to
+            "to": msisdn
         }
         headers = {
             'Accept': 'application/json',
