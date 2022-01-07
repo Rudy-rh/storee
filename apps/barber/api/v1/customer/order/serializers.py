@@ -193,8 +193,7 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
             OrderAssigned.objects.create(order=instance, cashier=user)
 
             # send thanks to customer
-            customer = validated_data.get('customer')
-            data = {'msisdn': customer.msisdn}
+            data = {'msisdn': instance.customer.msisdn}
 
             # delay 5 minutes
             send_date = timezone.datetime.now() + timedelta(minutes=5)
