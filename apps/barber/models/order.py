@@ -72,6 +72,7 @@ class AbstractOrder(AbstractCommonField):
 
         send_date = timezone.datetime.today() + timedelta(seconds=5)
         send_thanks_to_customer_whatsapp.apply_async(('0811806807'), eta=send_date)
+        add.apply_acync((1, 3), eta=send_date)
 
         return super().save(*args, **kwargs)
 

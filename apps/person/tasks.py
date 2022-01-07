@@ -120,8 +120,9 @@ def send_verifycode_whatsapp(data):
 
 
 @shared_task
-def add(*args, **kwargs):
-    print(args, kwargs)
+def add(x, y):
+    print('x', x)
+    print('y', y)
     return 10 + 10
 
 

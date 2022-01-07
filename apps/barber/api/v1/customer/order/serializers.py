@@ -193,13 +193,16 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
             OrderAssigned.objects.create(order=instance, cashier=user)
 
             # send thanks to customer
-            data = {'msisdn': instance.customer.msisdn}
+            msisdn = instance.customer.msisdn
+            data = {'msisdn': msisdn}
 
             # delay 5 minutes
-            send_date = timezone.datetime.now() + timedelta(minutes=5)
+            send_date = timezone.datetime.today() + timedelta(minutes=5)
 
             # send_thanks_to_customer_whatsapp.delay(data)
-            send_thanks_to_customer_whatsapp.apply_async(kwargs=data, eta=send_date)
+            send_thanks_to_customer_whatsapp \
+                .apply_async((msisdn), eta=send_date)
+
         return instance
 
 
