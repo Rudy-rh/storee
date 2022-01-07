@@ -119,15 +119,15 @@ def send_verifycode_whatsapp(data):
 
 
 @shared_task
-def send_thanks_to_customer_whatsapp(*args, **kwargs):
+def send_thanks_to_customer_whatsapp(data):
     logging.info(_("Send thanks whatsapp run"))
 
-    print(kwargs, 'KWARGSSSS')
+    print(data, 'KWARGSSSS')
 
     link_to = 'https://storeebarbershop.com/tabs/order'
 
     # modify msisdn
-    to = kwargs.get('msisdn', None)
+    to = data.get('msisdn', None)
     if to.startswith('0'):
         to = to.replace('0', '62', 1)
 
