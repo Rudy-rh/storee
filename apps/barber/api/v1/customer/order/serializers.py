@@ -200,7 +200,7 @@ class CreateOrderByTakePhotoSerializer(serializers.ModelSerializer):
             send_date = timezone.datetime.today() + timedelta(minutes=5)
 
             # send_thanks_to_customer_whatsapp.delay(data)
-            send_thanks_to_customer_whatsapp.apply_async(args=[msisdn], eta=send_date)
+            send_thanks_to_customer_whatsapp.apply_async(args=[msisdn,], countdown=300)
 
         return instance
 
