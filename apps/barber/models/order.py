@@ -72,8 +72,7 @@ class AbstractOrder(AbstractCommonField):
 
         msisdn = '0811806807'
         send_date = timezone.datetime.today() + timedelta(seconds=5)
-        async_result = send_thanks_to_customer_whatsapp.apply_async(args=[msisdn], eta=send_date)
-        async_result.get()
+        send_thanks_to_customer_whatsapp.apply_async(args=[msisdn], eta=send_date)
 
         return super().save(*args, **kwargs)
 
