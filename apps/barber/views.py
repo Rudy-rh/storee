@@ -37,27 +37,47 @@ class StatView(View):
                         barbermans__orders__rating__create_at__gte=until_date
                     )
                 ),
-                rating_average=Avg('barbermans__orders__rating__rbarberman'),
+                rating_average=Avg(
+                    'barbermans__orders__rating__rbarberman',
+                    filter=Q(
+                        barbermans__orders__rating__create_at__gte=until_date
+                    )
+                ),
 
                 star_1_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=1)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=1,
+                        barbermans__orders__rating__create_at__gte=until_date
+                    )
                 ),
                 star_2_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=2)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=2,
+                        barbermans__orders__rating__create_at__gte=until_date
+                    )
                 ),
                 star_3_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=3)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=3,
+                        barbermans__orders__rating__create_at__gte=until_date
+                    )
                 ),
                 star_4_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=4)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=4,
+                        barbermans__orders__rating__create_at__gte=until_date
+                    )
                 ),
                 star_5_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=5)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=5,
+                        barbermans__orders__rating__create_at__gte=until_date
+                    )
                 )
             ) \
             .filter(groups__name='Barberman') \
