@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+        integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+
+    <title>Storee Barber Shop Stat</title>
+</head>
+
+<body>
+
+    <div class="container py-4">
+        <div class="row">
+            {% for data in barberman_ratings %}
+            <div class="col-12 col-sm-6">
+                <canvas id="myChart-{{ data.id }}" height="200"></canvas>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js" crossorigin="anonymous"></script>
+
+    {{ barberman_ratings_json|json_script:"hello-data" }}
+
+    <script>
+        const barberman_ratings = JSON.parse(document.getElementById('hello-data').textContent);
+
+        $.each(barberman_ratings, function (i, v) {
+            const ctx = document.getElementById('myChart-' + v.id);
+            const myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1', '2', '3', '4', '5'],
+                    datasets: [{
+                        label: false,
+                        data: [
+                            v.star_1_count,
+                            v.star_2_count,
+                            v.star_3_count,
+                            v.star_4_count,
+                            v.star_5_count
+                        ],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1,
+                        barPercentage: 0.9,
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: v.name
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Rating'
+                            },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Jumlah Booking'
+                            },
+                            min: 0,
+                            max: v.total_order,
+                            ticks: {
+                                // forces step size to be 50 units
+                                stepSize: 1
+                            }
+                        },
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

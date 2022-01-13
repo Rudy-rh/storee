@@ -1,6 +1,5 @@
-from django.db.models.aggregates import Count, Sum
+from django.db.models.aggregates import Count
 from django.db.models.query_utils import Q
-from django.db.models.functions import Round
 from django.utils import timezone
 
 from rest_framework import viewsets, status as response_status
@@ -8,7 +7,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from django.db.models import Avg, F
+from django.db.models import Avg
 
 from .serializers import OrderRatingSerializer
 from utils.generals import get_model

@@ -1,14 +1,9 @@
-from datetime import timedelta
 import os
 
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
-
-from apps.person.tasks import send_thanks_to_customer_whatsapp, add
-
 from .abstract import AbstractCommonField
 
 
@@ -41,7 +36,8 @@ class AbstractOrder(AbstractCommonField):
     styleitem = models.ForeignKey('barber.StyleItem', on_delete=models.CASCADE,
                                   related_name='orders', null=True, blank=True)
     barberman = models.ForeignKey('barber.BranchBarberman', on_delete=models.SET_NULL, blank=True,
-                                  null=True, limit_choices_to={'user__groups__name': 'Barberman'})
+                                  null=True, limit_choices_to={'user__groups__name': 'Barberman'},
+                                  related_name='orders')
     branch = models.ForeignKey('barber.Branch', on_delete=models.SET_NULL,
                                related_name='orders', editable=False, null=True, blank=True)
 

@@ -8,7 +8,6 @@ from django.core.mail import BadHeaderError, EmailMultiAlternatives
 
 # Celery config
 from celery import shared_task
-from setup.celery import app
 
 
 @shared_task
@@ -117,13 +116,6 @@ def send_verifycode_whatsapp(data):
     else:
         logging.warning(
             _("Tried to send whatsapp to non-existing VerifyCode Code"))
-
-
-@shared_task
-def add(x, y):
-    print('x', x)
-    print('y', y)
-    return 10 + 10
 
 
 @shared_task
