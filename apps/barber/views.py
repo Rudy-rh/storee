@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.utils import timezone
 from django.views import View
 from django.apps import apps
 from django.db.models import Avg, Count
@@ -16,6 +17,7 @@ class StatView(View):
     def get(self, request):
         data = {}
         barberman_ratings_json = []
+        until_date = timezone.datetime(2021, 11, 1)
 
         rating = OrderRating.objects \
             .aggregate(
@@ -29,7 +31,12 @@ class StatView(View):
 
         barberman_ratings = User.objects \
             .annotate(
-                total_order=Count('barbermans__orders'),
+                total_order=Count(
+                    'barbermans__orders__rating',
+                    filter=Q(
+                        barbermans__orders__rating__create_at__gte=until_date
+                    )
+                ),
                 rating_average=Avg('barbermans__orders__rating__rbarberman'),
 
                 star_1_count=Count(
