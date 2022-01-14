@@ -178,6 +178,7 @@ class StatView(View):
             'barberman_ratings_json': barberman_ratings_json,
             'cashier_ratings': cashier_ratings,
             'cashier_ratings_json': cashier_ratings_json,
+            'rating_overall_json': rating_overall,
         })
 
         return render(request, self.template_name, data)
