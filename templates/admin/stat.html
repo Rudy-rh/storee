@@ -108,6 +108,10 @@
                         legend: {
                             display: false
                         },
+                        title: {
+                            display: true,
+                            text: 'Total Booking ' + rating_overall.total,
+                        }
                     },
                     scales: {
                         x: {
@@ -189,7 +193,7 @@
                             text: 'Jumlah Booking'
                         },
                         min: 0,
-                        max: v.total_order,
+                        max: 5,
                         ticks: {
                             // forces step size to be 50 units
                             stepSize: 1
