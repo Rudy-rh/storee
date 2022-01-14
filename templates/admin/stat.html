@@ -16,17 +16,31 @@
 <body>
 
     <div class="container py-4">
+        <h3>Rating Barberman</h3>
+
         <div class="row">
             {% for data in barberman_ratings %}
-                <div class="col-12 col-sm-6">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-body">
-                            <canvas id="myChart-{{ data.id }}" height="200"></canvas>
-                            </div>
+            <div class="col-12 col-sm-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <canvas id="myChart-{{ data.id }}" height="200"></canvas>
                     </div>
-                    </div>
+                </div>
+            </div>
             {% endfor %}
         </div>
+<h3>Rating Cashier</h3>
+<div class="row">
+    {% for data in cashier_ratings %}
+    <div class="col-12 col-sm-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <canvas id="myChart-{{ data.id }}" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
     </div>
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
@@ -38,12 +52,83 @@
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js" crossorigin="anonymous"></script>
 
-    {{ barberman_ratings_json|json_script:"hello-data" }}
+    {{ barberman_ratings_json|json_script:"barberman-rating" }}
+    {{ cashier_ratings_json|json_script:"cashier-rating" }}
 
     <script>
-        const barberman_ratings = JSON.parse(document.getElementById('hello-data').textContent);
+                    const barberman_ratings = JSON.parse(document.getElementById('barberman-rating').textContent);
+                    const cashier_ratings = JSON.parse(document.getElementById('cashier-rating').textContent);
 
-        $.each(barberman_ratings, function (i, v) {
+            // BARBERMAN
+                    $.each(barberman_ratings, function (i, v) {
+                    const ctx = document.getElementById('myChart-' + v.id);
+                    const myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['1', '2', '3', '4', '5'],
+                            datasets: [{
+                                label: false,
+                                data: [
+                                    v.star_1_count,
+                                    v.star_2_count,
+                                    v.star_3_count,
+                                    v.star_4_count,
+                                    v.star_5_count
+                                ],
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                    'rgba(255, 206, 86, 0.2)',
+                                    'rgba(75, 192, 192, 0.2)',
+                                    'rgba(153, 102, 255, 0.2)'
+                                ],
+                                borderColor: [
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(75, 192, 192, 1)',
+                                    'rgba(153, 102, 255, 1)'
+                                ],
+                                borderWidth: 1,
+                                barPercentage: 0.9,
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                title: {
+                                    display: true,
+                                    text: v.name + ' (rataan rating: ' + v.rating_average + ')',
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Rating'
+                                    },
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Jumlah Booking'
+                                    },
+                                    min: 0,
+                                    max: v.total_order,
+                                    ticks: {
+                                        // forces step size to be 50 units
+                                        stepSize: 1
+                                    }
+                                },
+                            }
+                        }
+                    });
+                });
+
+                    // CASHIER
+                    $.each(cashier_ratings, function (i, v) {
             const ctx = document.getElementById('myChart-' + v.id);
             const myChart = new Chart(ctx, {
                 type: 'bar',

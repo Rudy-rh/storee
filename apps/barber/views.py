@@ -17,9 +17,11 @@ class StatView(View):
     def get(self, request):
         data = {}
         barberman_ratings_json = []
+        cashier_ratings_json = []
         until_date = timezone.datetime(2021, 11, 1)
 
-        rating = OrderRating.objects \
+        rating_overall = OrderRating.objects \
+            .filter(create_at__gte=until_date) \
             .aggregate(
                 total=Count('id'),
                 rmanagement=Avg('rmanagement'),
@@ -43,7 +45,6 @@ class StatView(View):
                         barbermans__orders__rating__create_at__gte=until_date
                     )
                 ),
-
                 star_1_count=Count(
                     'barbermans__orders__rating__rbarberman',
                     filter=Q(
@@ -101,9 +102,82 @@ class StatView(View):
 
             barberman_ratings_json.append(x)
 
+        cashier_ratings = User.objects \
+            .annotate(
+                total_order=Count(
+                    'assigneds__rating',
+                    filter=Q(
+                        assigneds__rating__create_at__gte=until_date
+                    )
+                ),
+                rating_average=Avg(
+                    'assigneds__rating__rcashier',
+                    filter=Q(
+                        assigneds__rating__create_at__gte=until_date
+                    )
+                ),
+                star_1_count=Count(
+                    'assigneds__rating__rcashier',
+                    filter=Q(
+                        assigneds__rating__rcashier=1,
+                        assigneds__rating__create_at__gte=until_date
+                    )
+                ),
+                star_2_count=Count(
+                    'assigneds__rating__rcashier',
+                    filter=Q(
+                        assigneds__rating__rcashier=2,
+                        assigneds__rating__create_at__gte=until_date
+                    )
+                ),
+                star_3_count=Count(
+                    'assigneds__rating__rcashier',
+                    filter=Q(
+                        assigneds__rating__rcashier=3,
+                        assigneds__rating__create_at__gte=until_date
+                    )
+                ),
+                star_4_count=Count(
+                    'assigneds__rating__rcashier',
+                    filter=Q(
+                        assigneds__rating__rcashier=4,
+                        assigneds__rating__create_at__gte=until_date
+                    )
+                ),
+                star_5_count=Count(
+                    'assigneds__rating__rcashier',
+                    filter=Q(
+                        assigneds__rating__rcashier=5,
+                        assigneds__rating__create_at__gte=until_date
+                    )
+                )
+            ) \
+            .filter(
+                Q(groups__name='Cashier'),
+                Q(total_order__gt=0)
+            ) \
+            .order_by('-id')
+
+        for d in cashier_ratings:
+            x = {
+                'total_order': d.total_order,
+                'rating_average': d.rating_average,
+                'star_1_count': d.star_1_count,
+                'star_2_count': d.star_2_count,
+                'star_3_count': d.star_3_count,
+                'star_4_count': d.star_4_count,
+                'star_5_count': d.star_5_count,
+                'name': d.name,
+                'id': d.id,
+            }
+
+            cashier_ratings_json.append(x)
+
         data.update({
             'barberman_ratings': barberman_ratings,
             'barberman_ratings_json': barberman_ratings_json,
+            'cashier_ratings': cashier_ratings,
+            'cashier_ratings_json': cashier_ratings_json,
         })
 
         return render(request, self.template_name, data)
