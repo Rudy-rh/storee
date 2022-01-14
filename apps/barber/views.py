@@ -80,7 +80,10 @@ class StatView(View):
                     )
                 )
             ) \
-            .filter(groups__name='Barberman') \
+            .filter(
+                Q(groups__name='Barberman'),
+                Q(total_order__gt=0)
+            ) \
             .order_by('-id')
 
         for d in barberman_ratings:
