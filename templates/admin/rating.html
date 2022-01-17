@@ -19,6 +19,8 @@
 <body>
     <div class="container py-4">
         <h4 class="border-bottom pb-3">
+            <a href="{% url 'stat' %}" class="btn btn-info btn-sm">Back</a>
+
             {% if name %}
                 Rating untuk: {{ name }} ({{ total }} order)
             {% else %}
@@ -28,7 +30,7 @@
 
         <ol class="list-unstyled">
             {% for rating in object_list %}
-                <li>
+                <li class="border-bottom pb-3 mb-3">
                     <div class="font-weight-bold">
                         {{ rating.order.customer.name }}
                     </div>

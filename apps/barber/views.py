@@ -199,7 +199,7 @@ class StatView(View):
 
 class RatingListView(ListView):
     model = OrderRating
-    paginate_by = 1
+    paginate_by = 25
     template_name = 'admin/rating.html'
 
     def get_queryset(self):
