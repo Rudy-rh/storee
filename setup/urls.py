@@ -5,12 +5,16 @@ from django.conf.urls.static import static
 from django.contrib.auth.decorators import login_required
 
 from api import routers as api_routers
-from apps.barber.views import StatView
+from apps.barber.views import RatingListView, StatView
 
 urlpatterns = [
     path('api/', include(api_routers)),
     path('admin/', admin.site.urls),
-    path('stat/', login_required(StatView.as_view())),
+    path('stat/', login_required(StatView.as_view()), name='stat'),
+    path('rating/',
+         login_required(RatingListView.as_view()), name='rating'),
+    path('rating/<int:user_id>/',
+         login_required(RatingListView.as_view()), name='rating'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL,

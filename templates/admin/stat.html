@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
 
@@ -9,6 +10,8 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
         integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-datetimepicker.min.css' %}">
 
     <title>Storee Barber Shop Stat</title>
 </head>
@@ -16,13 +19,38 @@
 <body>
 
     <div class="container py-4">
+        <h3>Rentang Waktu</h3>
+        
+        <div class="row mb-4">
+            <div class="col-12 col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="start" class="input-label">Dari Tanggal</label>
+                    <div class="input-group date">
+                        <input type="text" id="start" class="form-control datetimepicker-input" data-toggle="datetimepicker"
+                            data-target="#start" />
+                    </div>
+                </div>
+        
+                <div class="form-group">
+                    <label for="end" class="input-label">Sampai Tanggal</label>
+                    <div class="input-group date">
+                        <input type="text" id="end" class="form-control datetimepicker-input" data-toggle="datetimepicker"
+                            data-target="#end" />
+                    </div>
+                </div>
+        
+                <button type="button" id="filter-by-date" class="btn btn-info d-block w-100">Filter</button>
+            </div>
+        </div>
+
         <h3>Rating Overall</h3>
         
         <div class="row">
-            <div class="col-12 col-sm-6">
+            <div class="col-12 col-sm-12 col-md-6">
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <canvas id="myChart-overall" height="200"></canvas>
+                        <a href="{% url 'rating' %}" class="btn btn-link d-block border-top mt-3">Lihat Pemberi Rating</a>
                     </div>
                 </div>
             </div>
@@ -32,139 +60,77 @@
 
         <div class="row">
             {% for data in barberman_ratings %}
-            <div class="col-12 col-sm-6">
+            <div class="col-12 col-sm-12 col-md-6">
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <canvas id="myChart-{{ data.id }}" height="200"></canvas>
+                        <a href="{% url 'rating' data.id %}" class="btn btn-link d-block border-top mt-3">Lihat Pemberi Rating</a>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-<h3>Rating Cashier</h3>
-<div class="row">
-    {% for data in cashier_ratings %}
-    <div class="col-12 col-sm-6">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <canvas id="myChart-{{ data.id }}" height="200"></canvas>
+
+        <h3>Rating Cashier</h3>
+        <div class="row">
+            {% for data in cashier_ratings %}
+            <div class="col-12 col-sm-12 col-md-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <canvas id="myChart-{{ data.id }}" height="200"></canvas>
+                        <a href="{% url 'rating' data.id %}" class="btn btn-link d-block border-top mt-3">Lihat Pemberi Rating</a>
+                    </div>
+                </div>
             </div>
+            {% endfor %}
         </div>
-    </div>
-    {% endfor %}
-</div>
     </div>
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
-        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-        crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js" crossorigin="anonymous"></script>
+    <script src="{% static 'js/moment-with-locales.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap-datetimepicker.min.js' %}"></script>
+    <script src="{% static 'js/jquery.query-object.js' %}"></script>
 
     {{ barberman_ratings_json|json_script:"barberman-rating" }}
     {{ cashier_ratings_json|json_script:"cashier-rating" }}
     {{ rating_overall_json|json_script:"rating-overall" }}
 
-    <script>
-            const barberman_ratings = JSON.parse(document.getElementById('barberman-rating').textContent);
-            const cashier_ratings = JSON.parse(document.getElementById('cashier-rating').textContent);
-            const rating_overall = JSON.parse(document.getElementById('rating-overall').textContent);
+    <script type="text/javascript">
+        const page_url = "{% url 'stat' %}";
+        const barberman_ratings = JSON.parse(document.getElementById('barberman-rating').textContent);
+        const cashier_ratings = JSON.parse(document.getElementById('cashier-rating').textContent);
+        const rating_overall = JSON.parse(document.getElementById('rating-overall').textContent);
 
-            // OVERALL
-            const ctx = document.getElementById('myChart-overall');
-            const myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Barberman', 'Cashier', 'Management', 'Hygiene'],
-                    datasets: [{
-                        label: false,
-                        data: [
-                            rating_overall.rbarberman,
-                            rating_overall.rcashier,
-                            rating_overall.rmanagement,
-                            rating_overall.rhygiene
-                        ],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)',
-                            'rgba(75, 192, 192, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)'
-                        ],
-                        borderWidth: 1,
-                        barPercentage: 0.9,
-                    }]
-                },
-                options: {
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: 'Total Booking ' + rating_overall.total,
-                        }
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'User'
-                            },
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Rataan Rating'
-                            },
-                            min: 0,
-                            max: 5,
-                            ticks: {
-                                // forces step size to be 50 units
-                                stepSize: 1
-                            }
-                        },
-                    }
-                }
-            });
-
-    // BARBERMAN
-    $.each(barberman_ratings, function (i, v) {
-        const ctx = document.getElementById('myChart-' + v.id);
+        // OVERALL
+        const ctx = document.getElementById('myChart-overall');
         const myChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['1', '2', '3', '4', '5'],
+                labels: ['Barberman', 'Cashier', 'Management', 'Hygiene'],
                 datasets: [{
                     label: false,
                     data: [
-                        v.star_1_count,
-                        v.star_2_count,
-                        v.star_3_count,
-                        v.star_4_count,
-                        v.star_5_count
+                        rating_overall.rbarberman,
+                        rating_overall.rcashier,
+                        rating_overall.rmanagement,
+                        rating_overall.rhygiene
                     ],
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',
                         'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)'
+                        'rgba(75, 192, 192, 0.2)'
                     ],
                     borderColor: [
                         'rgba(255, 99, 132, 1)',
                         'rgba(54, 162, 235, 1)',
                         'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)'
+                        'rgba(75, 192, 192, 1)'
                     ],
                     borderWidth: 1,
                     barPercentage: 0.9,
@@ -177,23 +143,23 @@
                     },
                     title: {
                         display: true,
-                        text: v.name + ' (rataan rating: ' + v.rating_average + ' dari ' + v.total_order + ' booking)',
+                        text: 'Total Booking ' + rating_overall.total,
                     }
                 },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Rating'
+                            text: 'User'
                         },
                     },
                     y: {
                         title: {
                             display: true,
-                            text: 'Jumlah Booking'
+                            text: 'Rataan Rating'
                         },
                         min: 0,
-                        max: v.total_order,
+                        max: 5,
                         ticks: {
                             // forces step size to be 50 units
                             stepSize: 1
@@ -202,10 +168,9 @@
                 }
             }
         });
-    });
 
-            // CASHIER
-            $.each(cashier_ratings, function (i, v) {
+        // BARBERMAN
+        $.each(barberman_ratings, function (i, v) {
             const ctx = document.getElementById('myChart-' + v.id);
             const myChart = new Chart(ctx, {
                 type: 'bar',
@@ -268,6 +233,101 @@
                             }
                         },
                     }
+                }
+            });
+        });
+
+        // CASHIER
+        $.each(cashier_ratings, function (i, v) {
+            const ctx = document.getElementById('myChart-' + v.id);
+            const myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1', '2', '3', '4', '5'],
+                    datasets: [{
+                        label: false,
+                        data: [
+                            v.star_1_count,
+                            v.star_2_count,
+                            v.star_3_count,
+                            v.star_4_count,
+                            v.star_5_count
+                        ],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1,
+                        barPercentage: 0.9,
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: v.name + ' (rataan rating: ' + v.rating_average + ' dari ' + v.total_order + ' booking)',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Rating'
+                            },
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Jumlah Booking'
+                            },
+                            min: 0,
+                            max: v.total_order,
+                            ticks: {
+                                // forces step size to be 50 units
+                                stepSize: 1
+                            }
+                        },
+                    }
+                }
+            });
+        });
+
+        $(function () {
+            let start_date = $.query.get('start');
+            let end_date = $.query.get('end');
+
+            $('#start').datetimepicker({
+                format: 'L',
+                locale: 'id',
+            }).val(start_date);
+
+            $('#end').datetimepicker({
+                format: 'L',
+                locale: 'id',
+            }).val(end_date);
+
+            $(document).on('click', '#filter-by-date', function(e) {
+                e.preventDefault();
+
+                let start_date = $('#start').val();
+                let end_date = $('#end').val();
+
+                if (start_date && end_date) {
+                    let url = page_url + $.query.set('start', start_date).set('end', end_date).toString();
+                    window.location.href = url;
                 }
             });
         });

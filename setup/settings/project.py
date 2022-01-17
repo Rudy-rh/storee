@@ -22,7 +22,7 @@ USER_REQUIRED_VERIFICATION = True
 USER_VERIFICATION_FIELDS = ['email', 'msisdn']
 
 LOGOUT_REDIRECT_URL = '/'
-LOGIN_URL = '/person/login/'
+LOGIN_URL = '/admin/login/'
 
 
 # Application definition

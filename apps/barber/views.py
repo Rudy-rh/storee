@@ -1,3 +1,5 @@
+from tokenize import group
+from django.views.generic.list import ListView
 from django.shortcuts import render
 from django.utils import timezone
 from django.views import View
@@ -5,7 +7,6 @@ from django.apps import apps
 from django.db.models import Avg, Count
 from django.db.models.query_utils import Q
 from django.contrib.auth import get_user_model
-from django.core.serializers import serialize
 
 User = get_user_model()
 OrderRating = apps.get_registered_model('barber', 'OrderRating')
@@ -20,9 +21,21 @@ class StatView(View):
         cashier_ratings_json = []
         until_date = timezone.datetime(2021, 11, 1)
 
-        rating_overall = OrderRating.objects \
-            .filter(create_at__gte=until_date) \
-            .aggregate(
+        start_date = request.GET.get('start')
+        end_date = request.GET.get('end')
+        rating_overall_qs = OrderRating.objects
+
+        if not start_date and not end_date:
+            rating_overall_qs = rating_overall_qs \
+                .filter(create_at__gte=until_date)
+        else:
+            start_date_obj = timezone.datetime.strptime(start_date, '%d/%m/%Y')
+            end_date_obj = timezone.datetime.strptime(end_date, '%d/%m/%Y')
+
+            rating_overall_qs = rating_overall_qs \
+                .filter(create_at__range=(start_date_obj, end_date_obj))
+
+        rating_overall = rating_overall_qs.aggregate(
                 total=Count('id'),
                 rmanagement=Avg('rmanagement'),
                 rhygiene=Avg('rhygiene'),
@@ -182,3 +195,45 @@ class StatView(View):
         })
 
         return render(request, self.template_name, data)
+
+
+class RatingListView(ListView):
+    model = OrderRating
+    paginate_by = 1
+    template_name = 'admin/rating.html'
+
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id')
+        qs = super().get_queryset() \
+            .prefetch_related('order') \
+            .select_related('order')
+
+        if user_id:
+            qs = qs.prefetch_related('order', 'order__barberman', 'assigned') \
+                .select_related('order', 'order__barberman', 'assigned') \
+                .filter(
+                    Q(assigned__cashier__id=user_id) |
+                    Q(order__barberman__user__id=user_id)
+            )
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        user_id = self.kwargs.get('user_id')
+        name = None
+        is_barberman = False
+        is_cashier = False
+
+        if user_id:
+            user = User.objects.filter(id=user_id)
+            name = user.get().name
+            is_barberman = user.filter(groups__name='Barberman').exists()
+            is_cashier = user.filter(groups__name='Cashier').exists()
+
+        context = super().get_context_data(**kwargs)
+        context['name'] = name
+        context['total'] = self.get_queryset().count()
+        context['is_barberman'] = is_barberman
+        context['is_cashier'] = is_cashier
+
+        return context
