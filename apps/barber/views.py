@@ -184,39 +184,64 @@ class RatingListView(ListView):
     paginate_by = 25
     template_name = 'admin/rating.html'
 
+    def setup(self, *args, **kwargs) -> None:
+        super().setup(*args, **kwargs)
+
+        self.user_id = kwargs.get('user_id')
+        self.name = None
+        self.is_barberman = False
+        self.is_cashier = False
+        self.until_date = timezone.datetime(2021, 11, 1)
+
+        if self.user_id:
+            self.user = User.objects.filter(id=self.user_id)
+            self.name = self.user.get().name
+            self.is_barberman = self.user.filter(
+                groups__name='Barberman').exists()
+            self.is_cashier = self.user.filter(groups__name='Cashier').exists()
+
     def get_queryset(self):
-        until_date = timezone.datetime(2021, 11, 1)
-        user_id = self.kwargs.get('user_id')
+        rating = self.request.GET.get('rating')
+        rcashier = self.request.GET.get('rcashier')
+        rbarberman = self.request.GET.get('rbarberman')
+        rmanagement = self.request.GET.get('rmanagement')
+        rhygiene = self.request.GET.get('rhygiene')
+
         qs = super().get_queryset() \
             .prefetch_related('order') \
             .select_related('order')
 
-        if user_id:
+        if self.user_id:
             qs = qs.prefetch_related('order', 'order__barberman', 'assigned') \
                 .select_related('order', 'order__barberman', 'assigned') \
                 .filter(
-                    Q(assigned__cashier__id=user_id) |
-                    Q(order__barberman__user__id=user_id)
+                    Q(assigned__cashier__id=self.user_id) |
+                    Q(order__barberman__user__id=self.user_id)
             )
 
-        return qs.filter(create_at__gte=until_date)
+            if rating:
+                if self.is_barberman:
+                    qs = qs.filter(rbarberman=rating)
+                elif self.is_cashier:
+                    qs = qs.filter(rcashier=rating)
+        else:
+            if rcashier:
+                qs = qs.filter(rcashier=rcashier)
+            elif rbarberman:
+                qs = qs.filter(rbarberman=rbarberman)
+            elif rmanagement:
+                qs = qs.filter(rmanagement=rmanagement)
+            elif rhygiene:
+                qs = qs.filter(rhygiene=rhygiene)
+
+        return qs.filter(create_at__gte=self.until_date)
 
     def get_context_data(self, **kwargs):
-        user_id = self.kwargs.get('user_id')
-        name = None
-        is_barberman = False
-        is_cashier = False
-
-        if user_id:
-            user = User.objects.filter(id=user_id)
-            name = user.get().name
-            is_barberman = user.filter(groups__name='Barberman').exists()
-            is_cashier = user.filter(groups__name='Cashier').exists()
-
         context = super().get_context_data(**kwargs)
-        context['name'] = name
+        context['name'] = self.name
+        context['user_id'] = self.user_id
         context['total'] = self.get_queryset().count()
-        context['is_barberman'] = is_barberman
-        context['is_cashier'] = is_cashier
+        context['is_barberman'] = self.is_barberman
+        context['is_cashier'] = self.is_cashier
 
         return context

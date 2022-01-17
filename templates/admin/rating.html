@@ -28,6 +28,68 @@
             {% endif %}
         </h4>
 
+        {% if name %}
+            <div class="form-group mb-3">
+                <label class="input-label">Filter Rating</label>
+                <select id="star-filter" class="form-control star-filter">
+                    <option value="">Semua</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        {% else %}
+            <div class="form-group mb-3">
+                <label class="input-label">Rating Kasir</label>
+                <select id="star-filter-rcashier" class="form-control star-filter" invoked="rcashier">
+                    <option value="">Semua</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="input-label">Rating Barberman</label>
+                <select id="star-filter-rbarberman" class="form-control star-filter" invoked="rbarberman">
+                    <option value="">Semua</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="input-label">Rating Management</label>
+                <select id="star-filter-rmanagement" class="form-control star-filter" invoked="rmanagement">
+                    <option value="">Semua</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="input-label">Rating Kebersihan</label>
+                <select id="star-filter-rhygiene" class="form-control star-filter" invoked="rhygiene">
+                    <option value="">Semua</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        {% endif %}
+
         <ol class="list-unstyled">
             {% for rating in object_list %}
                 <li class="border-bottom pb-3 mb-3">
@@ -141,6 +203,68 @@
             </span>
         </div>
     </div>
+
+    <!-- jQuery and Bootstrap Bundle (includes Popper) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js" crossorigin="anonymous"></script>
+    <script src="{% static 'js/moment-with-locales.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap-datetimepicker.min.js' %}"></script>
+    <script src="{% static 'js/jquery.query-object.js' %}"></script>
+
+    <script type="text/javascript">
+        let user_id = "{{ user_id }}";
+        let page_url = "{% url 'rating' %}";
+        let rating = $.query.get('rating');
+        let rcashier = $.query.get('rcashier');
+        let rbarberman = $.query.get('rbarberman');
+        let rmanagement = $.query.get('rmanagement');
+        let rhygiene = $.query.get('rhygiene');
+
+        if (rating !== true) {
+            $('#star-filter').val(rating);
+        }
+
+        if (rcashier !== true) {
+            $('#star-filter-rcashier').val(rcashier);
+        }
+
+        if (rmanagement !== true) {
+            $('#star-filter-rmanagement').val(rmanagement);
+        }
+
+        if (rhygiene !== true) {
+            $('#star-filter-rhygiene').val(rhygiene);
+        }
+
+        if (rbarberman !== true) {
+            $('#star-filter-rbarberman').val(rbarberman);
+        }
+
+        $(document).on('change', '.star-filter', function(e) {
+            let value = $(this, 'option:selected').val();
+            let invoked = $(this).attr('invoked');
+            let url;
+
+            if (invoked) {
+                let current = $.query.toString();
+                
+                if (current) {
+                    current = current.replace('?', '');
+                    current_arr = current.split('=');
+                    $.query.REMOVE(current_arr[0], current_arr[1]);
+                }
+
+                url = page_url + $.query.set(invoked, value).toString();
+            } else {
+                url = page_url + (user_id ? user_id : '') + (value != '' ? $.query.set('rating', value).toString() : '');
+            }
+
+            window.location.href = url;
+        });
+    </script>
 </body>
 
 </html>
