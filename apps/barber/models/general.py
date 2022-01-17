@@ -81,7 +81,7 @@ class AbstractBrochure(AbstractCommonField):
     class Meta:
         abstract = True
         app_label = 'barber'
-        ordering = ['-create_at']
+        ordering = ['position']
 
     def __str__(self) -> str:
         return self.label or self.image.name
@@ -102,7 +102,7 @@ class AbstractRules(AbstractCommonField):
     class Meta:
         abstract = True
         app_label = 'barber'
-        ordering = ['-create_at']
+        ordering = ['position']
 
     def __str__(self) -> str:
         return self.label or self.image.name
@@ -123,7 +123,7 @@ class AbstractWorkStandardCategory(AbstractCommonField):
     class Meta:
         abstract = True
         app_label = 'barber'
-        ordering = ['-create_at']
+        ordering = ['position']
 
     def __str__(self) -> str:
         return '[{}] {}'.format(self.groups.name, self.label)
@@ -135,6 +135,7 @@ class AbstractWorkStandardSection(AbstractCommonField):
                                  related_name='standard_sections')
 
     label = models.CharField(max_length=255)
+    position = models.IntegerField(default=1)
     video_url = models.URLField(max_length=255, null=True, blank=True)
     video_file = models.FileField(max_length=500, upload_to='video',
                                   null=True, blank=True)
@@ -142,7 +143,7 @@ class AbstractWorkStandardSection(AbstractCommonField):
     class Meta:
         abstract = True
         app_label = 'barber'
-        ordering = ['-create_at']
+        ordering = ['position']
 
     def __str__(self) -> str:
         return self.label

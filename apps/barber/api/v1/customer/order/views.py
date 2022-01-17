@@ -244,14 +244,21 @@ class OrderApiView(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_name='history', url_path='histories')
     def history(self, request, format=None):
         year = request.query_params.get('year', None)
+        month = request.query_params.get('month', None)
+
         if not year:
             raise NotAcceptable(detail=_("Year not defined"))
+
+        date_q = Q(order__reserved_date__year=year)
+        if month:
+            date_q = Q(order__reserved_date__year=year) \
+                & Q(order__reserved_date__month=month)
 
         attachments = OrderAttachment.objects \
             .prefetch_related('order') \
             .select_related('order') \
             .filter(
-                Q(order__reserved_date__year=year),
+                date_q,
                 Q(order__customer_id=request.user.id)
                 | Q(order__barberman__user_id=request.user.id)
             )
