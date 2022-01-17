@@ -185,6 +185,7 @@ class RatingListView(ListView):
     template_name = 'admin/rating.html'
 
     def get_queryset(self):
+        until_date = timezone.datetime(2021, 11, 1)
         user_id = self.kwargs.get('user_id')
         qs = super().get_queryset() \
             .prefetch_related('order') \
@@ -198,7 +199,7 @@ class RatingListView(ListView):
                     Q(order__barberman__user__id=user_id)
             )
 
-        return qs
+        return qs.filter(create_at__gte=until_date)
 
     def get_context_data(self, **kwargs):
         user_id = self.kwargs.get('user_id')
