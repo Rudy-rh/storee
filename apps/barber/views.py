@@ -45,45 +45,54 @@ class StatView(View):
                 rsuggestion=Avg('rsuggestion')
             )
 
+        # filtered by date
+        if is_filtered:
+            barberman_q = Q(
+                barbermans__orders__rating__create_at__range=(
+                    start_date_obj, end_date_obj)
+            )
+        else:
+            barberman_q = Q(
+                barbermans__orders__rating__create_at__gte=until_date)
+
         barberman_ratings = User.objects \
             .annotate(
-                total_order=Count('barbermans__orders__rating'),
-                rating_average=Avg('barbermans__orders__rating__rbarberman'),
+                total_order=Count(
+                    'barbermans__orders__rating',
+                    filter=barberman_q
+                ),
+                rating_average=Avg(
+                    'barbermans__orders__rating__rbarberman',
+                    filter=barberman_q
+                ),
                 star_1_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=1)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=1) & barberman_q
                 ),
                 star_2_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=2)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=2) & barberman_q
                 ),
                 star_3_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=3)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=3) & barberman_q
                 ),
                 star_4_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=4)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=4) & barberman_q
                 ),
                 star_5_count=Count(
                     'barbermans__orders__rating__rbarberman',
-                    filter=Q(barbermans__orders__rating__rbarberman=5)
+                    filter=Q(
+                        barbermans__orders__rating__rbarberman=5) & barberman_q
                 )
             ) \
             .filter(Q(groups__name='Barberman'), Q(total_order__gt=0)) \
             .order_by('-id')
-
-        if is_filtered:
-            barberman_ratings = barberman_ratings \
-                .filter(
-                    Q(barbermans__orders__rating__create_at__range=(
-                        start_date_obj, end_date_obj))
-                )
-        else:
-            barberman_ratings = barberman_ratings \
-                .filter(
-                    Q(barbermans__orders__rating__create_at__gte=until_date)
-                )
 
         for d in barberman_ratings:
             x = {
@@ -100,41 +109,48 @@ class StatView(View):
 
             barberman_ratings_json.append(x)
 
+        # filtered by date
+        if is_filtered:
+            cashier_q = Q(
+                assigneds__rating__create_at__range=(
+                    start_date_obj, end_date_obj)
+            )
+        else:
+            cashier_q = Q(assigneds__rating__create_at__gte=until_date)
+
         cashier_ratings = User.objects \
             .annotate(
-                total_order=Count('assigneds__rating'),
-                rating_average=Avg('assigneds__rating__rcashier'),
+                total_order=Count(
+                    'assigneds__rating',
+                    filter=cashier_q
+                ),
+                rating_average=Avg(
+                    'assigneds__rating__rcashier',
+                    filter=cashier_q
+                ),
                 star_1_count=Count(
                     'assigneds__rating__rcashier',
-                    filter=Q(assigneds__rating__rcashier=1)
+                    filter=Q(assigneds__rating__rcashier=1) & cashier_q
                 ),
                 star_2_count=Count(
                     'assigneds__rating__rcashier',
-                    filter=Q(assigneds__rating__rcashier=2)
+                    filter=Q(assigneds__rating__rcashier=2) & cashier_q
                 ),
                 star_3_count=Count(
                     'assigneds__rating__rcashier',
-                    filter=Q(assigneds__rating__rcashier=3)
+                    filter=Q(assigneds__rating__rcashier=3) & cashier_q
                 ),
                 star_4_count=Count(
                     'assigneds__rating__rcashier',
-                    filter=Q(assigneds__rating__rcashier=4)
+                    filter=Q(assigneds__rating__rcashier=4) & cashier_q
                 ),
                 star_5_count=Count(
                     'assigneds__rating__rcashier',
-                    filter=Q(assigneds__rating__rcashier=5)
+                    filter=Q(assigneds__rating__rcashier=5) & cashier_q
                 )
             ) \
             .filter(Q(groups__name='Cashier'), Q(total_order__gt=0)) \
             .order_by('-id')
-
-        if is_filtered:
-            cashier_ratings = cashier_ratings \
-                .filter(assigneds__rating__create_at__range=(
-                        start_date_obj, end_date_obj))
-        else:
-            cashier_ratings = cashier_ratings \
-                .filter(assigneds__rating__create_at__gte=until_date)
 
         for d in cashier_ratings:
             x = {
