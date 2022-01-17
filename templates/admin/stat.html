@@ -38,8 +38,22 @@
                             data-target="#end" />
                     </div>
                 </div>
-        
-                <button type="button" id="filter-by-date" class="btn btn-info d-block w-100">Filter</button>
+                
+                <div class="row">
+                    <div class="col-6">
+                        <button type="button" id="filter-by-date" class="btn btn-info d-block w-100">
+                            Filter
+                        </button>
+                    </div>
+                    
+                    {% if is_filtered %}
+                        <div class="col-6">
+                            <a href="{% url 'stat' %}" class="btn btn-warning d-block w-100">
+                                Reset
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
