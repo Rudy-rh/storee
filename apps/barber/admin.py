@@ -109,7 +109,7 @@ class WorkStandardSectionAdmin(admin.ModelAdmin):
 
 class WorkStandardCategoryAdmin(admin.ModelAdmin):
     list_filter = ['groups', ]
-    list_display = ['label', 'position', ]
+    list_display = ['groups', 'label', 'position', ]
 
 
 admin.site.register(StyleCategory)
