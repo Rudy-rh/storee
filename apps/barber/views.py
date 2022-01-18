@@ -174,6 +174,8 @@ class StatView(View):
             'cashier_ratings_json': cashier_ratings_json,
             'rating_overall_json': rating_overall,
             'is_filtered': is_filtered,
+            'start_date': start_date,
+            'end_date': end_date,
         })
 
         return render(request, self.template_name, data)

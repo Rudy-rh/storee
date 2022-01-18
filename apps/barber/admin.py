@@ -55,7 +55,7 @@ class OrderAttachmentInline(admin.StackedInline):
     model = OrderAttachment
 
 
-class StyleItemExtend(admin.ModelAdmin):
+class StyleItemAdmin(admin.ModelAdmin):
     model = StyleItem
     inlines = [StyleAttachmentInline, ]
     list_display = ['label', 'image_preview', ]
@@ -75,7 +75,7 @@ class StyleItemExtend(admin.ModelAdmin):
     image_preview.allow_tags = True
 
 
-class OrderExtend(admin.ModelAdmin):
+class OrderAdmin(admin.ModelAdmin):
     model = Order
     inlines = [OrderAssignedInline, OrderRatingInline, OrderAttachmentInline, ]
     list_display = [
@@ -96,26 +96,30 @@ class OrderExtend(admin.ModelAdmin):
         return qs
 
 
-class BranchExtend(admin.ModelAdmin):
+class BranchAdmin(admin.ModelAdmin):
     model = Branch
     inlines = [BranchBarbermanInline, BranchCashierInline, ]
 
 
-class WorkStandardSectionExtend(admin.ModelAdmin):
+class WorkStandardSectionAdmin(admin.ModelAdmin):
     model = WorkStandardSection
     list_filter = ['category', ]
     list_display = ['label', 'category', ]
 
 
+class WorkStandardCategoryAdmin(admin.ModelAdmin):
+    list_filter = ['groups', ]
+
+
 admin.site.register(StyleCategory)
-admin.site.register(StyleItem, StyleItemExtend)
+admin.site.register(StyleItem, StyleItemAdmin)
 admin.site.register(StyleOfTheYear)
-admin.site.register(Order, OrderExtend)
-admin.site.register(Branch, BranchExtend)
+admin.site.register(Order, OrderAdmin)
+admin.site.register(Branch, BranchAdmin)
 admin.site.register(Brochure)
 admin.site.register(Rules)
-admin.site.register(WorkStandardCategory)
-admin.site.register(WorkStandardSection, WorkStandardSectionExtend)
+admin.site.register(WorkStandardCategory, WorkStandardCategoryAdmin)
+admin.site.register(WorkStandardSection, WorkStandardSectionAdmin)
 admin.site.register(Banner)
 admin.site.register(Information)
 admin.site.register(InformationRead)
