@@ -106,6 +106,7 @@ class OrderApiView(viewsets.ViewSet):
                         | Q(is_booking=True)
                         | Q(is_booking__isnull=True)
                     )
+
             elif timelapse == 'tomorrow':
                 tomorrow = timezone.datetime.today() + timezone.timedelta(days=1)
                 year = tomorrow.year
@@ -114,7 +115,14 @@ class OrderApiView(viewsets.ViewSet):
                 date = timezone.datetime(year, month, day).date()
                 instances = instances.filter(is_booking=True)
 
-            if date:
+            elif timelapse == 'all':
+                today = timezone.datetime.today().date
+                h_3 = timezone.datetime.today() - timezone.timedelta(days=3)
+                instances = instances.filter(
+                    reserved_date__range=(today, h_3.date)
+                )
+
+            if date and timelapse != 'all':
                 instances = instances.filter(reserved_date=date)
 
         # as barberman

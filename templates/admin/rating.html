@@ -18,190 +18,192 @@
 
 <body>
     <div class="container py-4">
-        <h4 class="border-bottom pb-3">
-            <a href="{% url 'stat' %}" class="btn btn-info btn-sm">Back</a>
+        {% if request.user.is_admin %}
+            <h4 class="border-bottom pb-3">
+                <a href="{% url 'stat' %}" class="btn btn-info btn-sm">Back</a>
+
+                {% if name %}
+                    Rating untuk: {{ name }} ({{ total }} order)
+                {% else %}
+                    Rating dari {{ total }} order
+                {% endif %}
+            </h4>
 
             {% if name %}
-                Rating untuk: {{ name }} ({{ total }} order)
+                <div class="form-group mb-3">
+                    <label class="input-label">Filter Rating</label>
+                    <select id="star-filter" class="form-control star-filter">
+                        <option value="">Semua</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
             {% else %}
-                Rating dari {{ total }} order
+                <div class="form-group mb-3">
+                    <label class="input-label">Rating Kasir</label>
+                    <select id="star-filter-rcashier" class="form-control star-filter" invoked="rcashier">
+                        <option value="">Semua</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="input-label">Rating Barberman</label>
+                    <select id="star-filter-rbarberman" class="form-control star-filter" invoked="rbarberman">
+                        <option value="">Semua</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="input-label">Rating Management</label>
+                    <select id="star-filter-rmanagement" class="form-control star-filter" invoked="rmanagement">
+                        <option value="">Semua</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="input-label">Rating Kebersihan</label>
+                    <select id="star-filter-rhygiene" class="form-control star-filter" invoked="rhygiene">
+                        <option value="">Semua</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
             {% endif %}
-        </h4>
 
-        {% if name %}
-            <div class="form-group mb-3">
-                <label class="input-label">Filter Rating</label>
-                <select id="star-filter" class="form-control star-filter">
-                    <option value="">Semua</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </div>
-        {% else %}
-            <div class="form-group mb-3">
-                <label class="input-label">Rating Kasir</label>
-                <select id="star-filter-rcashier" class="form-control star-filter" invoked="rcashier">
-                    <option value="">Semua</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </div>
+            <ol class="list-unstyled">
+                {% for rating in object_list %}
+                    <li class="border-bottom pb-3 mb-3">
+                        <div class="font-weight-bold">
+                            {{ rating.order.customer.name }}
+                        </div>
 
-            <div class="form-group mb-3">
-                <label class="input-label">Rating Barberman</label>
-                <select id="star-filter-rbarberman" class="form-control star-filter" invoked="rbarberman">
-                    <option value="">Semua</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </div>
+                        <div class="small">
+                            <i class="fa fa-phone" aria-hidden="true"></i>
+                            {{ rating.order.customer.msisdn }}
+                        </div>
 
-            <div class="form-group mb-3">
-                <label class="input-label">Rating Management</label>
-                <select id="star-filter-rmanagement" class="form-control star-filter" invoked="rmanagement">
-                    <option value="">Semua</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </div>
+                        <div>
+                            {{ rating.create_at|date }}
+                            
+                            <div class="mt-2">
+                                {% if is_cashier %}
 
-            <div class="form-group mb-3">
-                <label class="input-label">Rating Kebersihan</label>
-                <select id="star-filter-rhygiene" class="form-control star-filter" invoked="rhygiene">
-                    <option value="">Semua</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </div>
-        {% endif %}
-
-        <ol class="list-unstyled">
-            {% for rating in object_list %}
-                <li class="border-bottom pb-3 mb-3">
-                    <div class="font-weight-bold">
-                        {{ rating.order.customer.name }}
-                    </div>
-
-                    <div class="small">
-                        <i class="fa fa-phone" aria-hidden="true"></i>
-                        {{ rating.order.customer.msisdn }}
-                    </div>
-
-                    <div>
-                        {{ rating.create_at|date }}
-                        
-                        <div class="mt-2">
-                            {% if is_cashier %}
-
-                                {% with ''|center:rating.rcashier as range %}
-                                    {% for _ in range %}
-                                        <i class="fa fa-star text-warning" aria-hidden="true"></i>
-                                    {% endfor %}
-                                {% endwith %}
-
-                            {% elif is_barberman %}
-
-                                {% with ''|center:rating.rbarberman as range %}
-                                    {% for _ in range %}
-                                        <i class="fa fa-star text-warning" aria-hidden="true"></i>
-                                    {% endfor %}
-                                {% endwith %}
-
-                            {% else %}
-                                <div>
-                                    Kasir: 
                                     {% with ''|center:rating.rcashier as range %}
                                         {% for _ in range %}
                                             <i class="fa fa-star text-warning" aria-hidden="true"></i>
                                         {% endfor %}
                                     {% endwith %}
-                                </div>
 
-                                <div>
-                                    Barberman: 
+                                {% elif is_barberman %}
+
                                     {% with ''|center:rating.rbarberman as range %}
                                         {% for _ in range %}
                                             <i class="fa fa-star text-warning" aria-hidden="true"></i>
                                         {% endfor %}
                                     {% endwith %}
-                                </div>
 
-                                <div>
-                                    Manajemen: 
-                                    {% with ''|center:rating.rmanagement as range %}
-                                        {% for _ in range %}
-                                            <i class="fa fa-star text-warning" aria-hidden="true"></i>
-                                        {% endfor %}
-                                    {% endwith %}
-                                </div>
+                                {% else %}
+                                    <div>
+                                        Kasir: 
+                                        {% with ''|center:rating.rcashier as range %}
+                                            {% for _ in range %}
+                                                <i class="fa fa-star text-warning" aria-hidden="true"></i>
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </div>
 
-                                <div>
-                                    Kebersihan: 
-                                    {% with ''|center:rating.rhygiene as range %}
-                                        {% for _ in range %}
-                                            <i class="fa fa-star text-warning" aria-hidden="true"></i>
-                                        {% endfor %}
-                                    {% endwith %}
-                                </div>
-                            {% endif %}
+                                    <div>
+                                        Barberman: 
+                                        {% with ''|center:rating.rbarberman as range %}
+                                            {% for _ in range %}
+                                                <i class="fa fa-star text-warning" aria-hidden="true"></i>
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </div>
+
+                                    <div>
+                                        Manajemen: 
+                                        {% with ''|center:rating.rmanagement as range %}
+                                            {% for _ in range %}
+                                                <i class="fa fa-star text-warning" aria-hidden="true"></i>
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </div>
+
+                                    <div>
+                                        Kebersihan: 
+                                        {% with ''|center:rating.rhygiene as range %}
+                                            {% for _ in range %}
+                                                <i class="fa fa-star text-warning" aria-hidden="true"></i>
+                                            {% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
-                </li>
-            {% empty %}
-                <li>No ratings yet.</li>
-            {% endfor %}
-        </ol>
+                    </li>
+                {% empty %}
+                    <li>No ratings yet.</li>
+                {% endfor %}
+            </ol>
 
-        <div class="pagination justify-content-center">
-            <span class="step-links d-flex align-items-center">
-                {% if page_obj.has_previous %}
-                <a href="?page=1" class="btn btn-light btn-sm">
-                    <i class="fa fa-angle-double-left"></i>
-                </a>
-                <a
-                href="?page={{ page_obj.previous_page_number }}"
-                class="btn btn-light btn-sm ml-1"
-                >
-                    <i class="fa fa-angle-left"></i>
-                </a>
-                {% endif %}
+            <div class="pagination justify-content-center">
+                <span class="step-links d-flex align-items-center">
+                    {% if page_obj.has_previous %}
+                    <a href="?page=1" class="btn btn-light btn-sm">
+                        <i class="fa fa-angle-double-left"></i>
+                    </a>
+                    <a
+                    href="?page={{ page_obj.previous_page_number }}"
+                    class="btn btn-light btn-sm ml-1"
+                    >
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    {% endif %}
 
-                <span class="current mx-2">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    <span class="current mx-2">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                    <a
+                    href="?page={{ page_obj.next_page_number }}"
+                    class="btn btn-light btn-sm mr-1"
+                    >
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+
+                    <a
+                    href="?page={{ page_obj.paginator.num_pages }}"
+                    class="btn btn-light btn-sm"
+                    >
+                        <i class="fa fa-angle-double-right"></i>
+                    </a>
+                    {% endif %}
                 </span>
-
-                {% if page_obj.has_next %}
-                <a
-                href="?page={{ page_obj.next_page_number }}"
-                class="btn btn-light btn-sm mr-1"
-                >
-                    <i class="fa fa-angle-right"></i>
-                </a>
-
-                <a
-                href="?page={{ page_obj.paginator.num_pages }}"
-                class="btn btn-light btn-sm"
-                >
-                    <i class="fa fa-angle-double-right"></i>
-                </a>
-                {% endif %}
-            </span>
-        </div>
+            </div>
+        {% endif %}
     </div>
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
