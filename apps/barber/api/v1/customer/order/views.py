@@ -122,8 +122,7 @@ class OrderApiView(viewsets.ViewSet):
                 h_3_fmt = h_3.strftime("%Y-%m-%d")
 
                 instances = instances.filter(
-                    reserved_date__lte=today,
-                    reserved_date__gte=h_3_fmt
+                    reserved_date__range=(h_3_fmt, today)
                 )
 
             if date and timelapse != 'all':
