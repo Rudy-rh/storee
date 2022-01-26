@@ -123,7 +123,7 @@ class OrderApiView(viewsets.ViewSet):
 
                 instances = instances.filter(
                     reserved_date__lte=today,
-                    reversed_date__gte=h_3_fmt
+                    reserved_date__gte=h_3_fmt
                 )
 
             if date and timelapse != 'all':
