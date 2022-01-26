@@ -99,6 +99,7 @@ class OrderApiView(viewsets.ViewSet):
 
                 if timelapse == 'today':
                     instances = instances.filter(is_booking=True)
+
                 elif timelapse == 'customer':
                     # all customer booking or not
                     instances = instances.filter(
@@ -116,10 +117,10 @@ class OrderApiView(viewsets.ViewSet):
                 instances = instances.filter(is_booking=True)
 
             elif timelapse == 'all':
-                today = timezone.datetime.today().date
+                today = timezone.datetime.today().date()
                 h_3 = timezone.datetime.today() - timezone.timedelta(days=3)
                 instances = instances.filter(
-                    reserved_date__range=(today, h_3.date)
+                    reserved_date__range=(today, h_3.date())
                 )
 
             if date and timelapse != 'all':
