@@ -105,6 +105,10 @@ class User(AbstractUser):
         return self.groups.filter(name__in=["Cashier"]).exists()
 
     @property
+    def is_ob(self):
+        return self.groups.filter(name__in=["Office Boy"]).exists()
+
+    @property
     def roles_by_group(self):
         group_annotate = self.groups.filter(name=OuterRef('name'))
         all_groups = self.groups.model.objects.all()

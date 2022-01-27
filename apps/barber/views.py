@@ -193,6 +193,7 @@ class RatingListView(ListView):
         self.name = None
         self.is_barberman = False
         self.is_cashier = False
+        self.is_ob = False
         self.until_date = timezone.datetime(2021, 11, 1)
 
         if self.user_id:
@@ -201,6 +202,7 @@ class RatingListView(ListView):
             self.is_barberman = self.user.filter(
                 groups__name='Barberman').exists()
             self.is_cashier = self.user.filter(groups__name='Cashier').exists()
+            self.is_ob = self.user.filter(groups__name='Office Boy').exists()
 
     def get_queryset(self):
         rating = self.request.GET.get('rating')
@@ -245,5 +247,6 @@ class RatingListView(ListView):
         context['total'] = self.get_queryset().count()
         context['is_barberman'] = self.is_barberman
         context['is_cashier'] = self.is_cashier
+        context['is_ob'] = self.is_ob
 
         return context

@@ -286,6 +286,7 @@ class RetrieveUserSerializer(BaseUserSerializer):
             'is_cashier': instance.is_cashier,
             'is_barberman': instance.is_barberman,
             'is_customer': instance.is_customer,
+            'is_ob': instance.is_ob,
         }
 
         return roles
