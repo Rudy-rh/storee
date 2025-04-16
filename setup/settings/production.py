@@ -12,6 +12,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '[::1]',
     '202.157.184.46',
+    '202.157.189.21',
     'console.storeebarbershop.com'
 ]
 
@@ -65,7 +66,7 @@ CSRF_TRUSTED_ORIGINS = [
 # Django CORS
 # ------------------------------------------------------------------------------
 # https://pypi.org/project/django-cors-headers/
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost',
