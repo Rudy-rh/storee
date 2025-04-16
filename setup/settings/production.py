@@ -71,7 +71,6 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost',
     'https://localhost',
-    'https://localhost/',
     'http://localhost:8100',
     'https://localhost:8100',
     'https://storee-46b6e.web.app',
