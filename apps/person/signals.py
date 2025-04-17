@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.conf import settings
 
 from utils.generals import get_model
-from .tasks import send_verifycode_sms, send_verifycode_whatsapp
+from .tasks import send_verifycode_email, send_verifycode_whatsapp
 
 Profile = get_model('person', 'Profile')
 
@@ -41,20 +41,19 @@ def verifycode_save_handler(sender, instance, created, **kwargs):
     if instance.is_used == False and instance.is_verified == False:
         data = {'passcode': getattr(instance, 'passcode', None)}
 
-        if settings.DEBUG == False:
-            # Send via email
-            if instance.email:
-                data.update({'email': getattr(instance, 'email', None)})
-                # send_verifycode_email.delay(data) # with celery
-                # send_verifycode_email(data)  # without celery
+        # Send via email
+        if instance.email:
+            data.update({'email': getattr(instance, 'email', None)})
+            send_verifycode_email.delay(data) # with celery
+            # send_verifycode_email(data)  # without celery
 
-            # Send via SMS
-            if instance.msisdn:
-                data.update({'msisdn': getattr(instance, 'msisdn', None)})
-                send_verifycode_whatsapp.delay(data)  # with celery
-                # send_verifycode_whatsapp(data)  # without celery
-                # send_verifycode_sms.delay(data)  # with celery
-                # send_verifycode_sms(data)  # without celery
+        # Send via SMS
+        if instance.msisdn:
+            data.update({'msisdn': getattr(instance, 'msisdn', None)})
+            send_verifycode_whatsapp.delay(data)  # with celery
+            # send_verifycode_whatsapp(data)  # without celery
+            # send_verifycode_sms.delay(data)  # with celery
+            # send_verifycode_sms(data)  # without celery
 
         # mark oldest VerifyCode as expired
         obtain = instance.msisdn or instance.email
