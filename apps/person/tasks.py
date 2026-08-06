@@ -99,11 +99,12 @@ def send_verifycode_whatsapp(data):
         to = to.replace('0', '62', 1)
 
     if to and passcode:
-        url = 'https://api.zuwinda.com/v1.2/message/whatsapp/send-text'
+        url = 'https://api.zuwinda.com/v2/messaging/whatsapp/message'
 
         payload = {
             "content": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode,
-            "instances_id": settings.ZUWINDA_INSTANCES_ID,
+            "accountId": settings.ZUWINDA_INSTANCES_ID,
+            "messageType": "text",
             "to": to
         }
         headers = {
@@ -129,13 +130,14 @@ def send_thanks_to_customer_whatsapp(msisdn):
         if msisdn.startswith('0'):
             msisdn = msisdn.replace('0', '62', 1)
 
-        url = 'https://api.zuwinda.com/v1.2/message/whatsapp/send-text'
+        url = 'https://api.zuwinda.com/v2/messaging/whatsapp/message'
         payload = {
             "content": "Terima kasih sudah berkunjung ke Storeebarbershop.Sorong hari ini."
             "Mohon dukungan Storeelove untuk memberikan rating penilaian kepada kami(penilaian terhadap Manjemen, Barberman, Kasir dan OB kami). Semoga kami terus menjadi lebih baik. Sila klik link ini %s"
             "\n\n Terima kasih" % link_to,
 
-            "instances_id": settings.ZUWINDA_INSTANCES_ID,
+            "accountId": settings.ZUWINDA_INSTANCES_ID,
+            "messageType": "text",
             "to": msisdn
         }
         headers = {
