@@ -1,42 +1,38 @@
 with open('apps/person/tasks.py', 'r') as f:
-    content = f.read()
+    lines = f.readlines()
 
-old_code = '''    if to and passcode:
-        url = 'https://api.zuwinda.com/v2/messaging/whatsapp/message'
+# Cari baris "if to and passcode:" dan "else:" berikutnya di fungsi send_verifycode_whatsapp
+start_idx = None
+end_idx = None
+for i, line in enumerate(lines):
+    if 'def send_verifycode_whatsapp' in line:
+        for j in range(i, len(lines)):
+            if 'if to and passcode:' in lines[j]:
+                start_idx = j
+            if start_idx is not None and lines[j].strip() == 'else:':
+                end_idx = j
+                break
+        break
 
-        payload = {
-            "content": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode,
-            "accountId": "509849e3-040a-4793-a9d5-ddace5c5bf98",
-            "messageType": "text",
-            "to": to
-        }
-        headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'x-access-key': settings.ZUWINDA_KEY
-        }
-        r = requests.post(url, json=payload, headers=headers)
-        logging.info(r.status_code)
-    else:'''
-
-new_code = '''    if to and passcode:
-        url = 'https://api.fonnte.com/send'
-
-        payload = {
-            "target": to,
-            "message": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode
-        }
-        headers = {
-            'Authorization': settings.FONNTE_TOKEN
-        }
-        r = requests.post(url, data=payload, headers=headers)
-        logging.info(r.status_code)
-    else:'''
-
-if old_code in content:
-    content = content.replace(old_code, new_code)
+if start_idx is not None and end_idx is not None:
+    new_block = [
+        '    if to and passcode:\n',
+        "        url = 'https://api.fonnte.com/send'\n",
+        '\n',
+        '        payload = {\n',
+        '            "target": to,\n',
+        '            "message": "Kode Verifikasi Storee Barber %s Jangan berikan kepada siapapun!" % passcode\n',
+        '        }\n',
+        '        headers = {\n',
+        "            'Authorization': settings.FONNTE_TOKEN\n",
+        '        }\n',
+        '        r = requests.post(url, data=payload, headers=headers)\n',
+        '        logging.info(r.status_code)\n',
+        '    else:\n',
+    ]
+    lines[start_idx:end_idx+1] = new_block
     with open('apps/person/tasks.py', 'w') as f:
-        f.write(content)
-    print("BERHASIL: Kode Zuwinda di send_verifycode_whatsapp sudah diganti ke Fonnte")
+        f.writelines(lines)
+    print("BERHASIL: fungsi send_verifycode_whatsapp sudah diganti ke Fonnte")
 else:
-    print("GAGAL: kode lama tidak ditemukan persis - perlu edit manual")
+    print("GAGAL: tidak ketemu batas fungsi - start_idx=%s end_idx=%s" % (start_idx, end_idx))
